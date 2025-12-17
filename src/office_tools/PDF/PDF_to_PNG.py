@@ -78,8 +78,8 @@ def pdf_to_images(pdf_path, output_folder, dpi=200):
         if doc:
             try:
                 doc.close()
-            except Exception as e:
-                print(f"文件关闭失败: {e}")
+            except Exception as close_exception:
+                print(f"文件关闭失败: {close_exception}")
         return 0, 0
 
 
@@ -171,15 +171,15 @@ def main():
     print("-" * 50)
 
 
-    start = int(datetime.now().timestamp() * 1000)
-    log.info(f"{start}ms")
+    start = int(datetime.now().timestamp())
+    log.info(f"{start}s")
 
     # 执行批量转换
     batch_pdf_to_png(input_folder, output_folder, dpi)
 
-    end = int(datetime.now().timestamp() * 1000)
-    log.info(f"{end}ms")
-    log.success(f"{(end - start) / 1000}s")
+    end = int(datetime.now().timestamp())
+    log.info(f"{end}s")
+    log.success(f"{end - start}s")
 
     input("\n按回车键退出...")
 
