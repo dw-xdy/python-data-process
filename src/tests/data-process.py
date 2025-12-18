@@ -25,11 +25,15 @@ df = pl.read_csv(csv_file)
 # 将语料数据的对象数组继续转为python中的list
 # print(df.select('语料数据').to_numpy().tolist())
 
+reg = r"\[\[\[(.*?不堪.*?)\]\]\]"
+
+pattern = r"\[\[\[([\u4E00-\u9FA5]{2}不堪)\]\]\]"
+
 # 方法1：使用 Polars 直接统计（推荐）
 result = (
     df.select(
         pl.col("语料数据")
-        .str.extract_all(r"\[\[\[(.*?不堪.*?)\]\]\]")  # 提取所有匹配
+        .str.extract_all(pattern)  # 提取所有匹配
         .alias("匹配项")
     )
     .explode("匹配项")  # 展开列表
@@ -40,6 +44,21 @@ result = (
 )
 
 print(result)
+
+# 写入CSV文件
+output_path = r"C:\Users\asus\Desktop\学校作业\kaishi\匹配结果1.csv"
+
+# 转换为pandas DataFrame，然后使用pandas的to_csv方法
+result_pd = result.to_pandas()
+
+# 指定编码保存（支持多种编码）
+result_pd.to_csv(
+    output_path,
+    index=False,  # 不保存索引
+    encoding='gbk',  # Windows中文系统常用
+    # encoding='utf-8-sig',  # 带BOM的UTF-8，Excel兼容性好
+    # encoding='utf-8',      # 标准UTF-8
+)
 
 # # 方法2：如果一定要用字典（基于你提供的代码）
 # sister_list = df.select('语料数据').to_numpy().tolist()
