@@ -1,6 +1,5 @@
 import polars as pl
 import numpy as np
-import re
 
 """
 关于编码问题:
