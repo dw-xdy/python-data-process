@@ -1,5 +1,6 @@
 import polars as pl
 import numpy as np
+from src.utils import RegexConstants
 
 
 """
