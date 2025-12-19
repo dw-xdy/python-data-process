@@ -60,21 +60,3 @@ result_pd.to_csv(
     # encoding='utf-8',      # 标准UTF-8
 )
 
-# # 方法2：如果一定要用字典（基于你提供的代码）
-# sister_list = df.select('语料数据').to_numpy().tolist()
-#
-# sister_dict = {}
-#
-# for string in sister_list:
-#     # 使用正则查找所有匹配
-#     matches = re.findall(r'\[\[\[(.*?不堪.*?)]\]\]', str(string))
-#     for match in matches:
-#         sister_dict[match] = sister_dict.get(match, 0) + 1
-#
-# # 按次数排序
-# sorted_dict = dict(sorted(sister_dict.items(), key=lambda x: x[1], reverse=True))
-#
-# print(sorted_dict)
-#
-# for (key, value) in sorted_dict.items():
-#     print(f"{key} : {value}")
