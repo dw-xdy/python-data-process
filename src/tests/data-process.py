@@ -2,6 +2,13 @@ import polars as pl
 import numpy as np
 import re
 
+
+"""
+关于编码问题:
+    一般来说windows系统应该都是要转成 gbk 编码
+    但是对于读取来说, polars一般都是要读取 UTF-8 编码
+"""
+
 # 文件路径
 csv_file = r'F:\备份\2_姐姐给我的词频统计代码用于学习\副本语料（1）.csv'
 
@@ -55,7 +62,7 @@ result_pd = result.to_pandas()
 result_pd.to_csv(
     output_path,
     index=False,  # 不保存索引
-    encoding='gbk',  # Windows中文系统常用
+    encoding='gbk',  # Windows中文系统常用,
     # encoding='utf-8-sig',  # 带BOM的UTF-8，Excel兼容性好
     # encoding='utf-8',      # 标准UTF-8
 )
