@@ -4,7 +4,6 @@ import pyautogui
 
 
 class QuickBrowserAutomation:
-
     def __init__(self):
         # 创建截图保存目录
         self.screenshot_dir = "C:\\Users\\asus\\Desktop\\学校作业\\water"
@@ -19,14 +18,10 @@ class QuickBrowserAutomation:
         # 截图区域
         self.screenshot_region = (133, 302, 1394, 713)  # (x, y, width, height)
 
-
-
     def click_at_position(self, x, y):
         """在指定位置点击"""
         pyautogui.click(x, y)
         time.sleep(1)
-
-
 
     def take_screenshot(self, question_number):
         """截图并保存"""
@@ -71,7 +66,6 @@ class QuickBrowserAutomation:
         except KeyboardInterrupt:
             print(f"\n用户中断操作，已处理到第{current_question}题")
 
-
     def show_settings(self):
         """显示当前设置"""
         print("\n当前配置:")
@@ -79,8 +73,6 @@ class QuickBrowserAutomation:
         print(f"查看解析按钮位置: {self.analysis_btn_pos}")
         print(f"下一题按钮位置: {self.next_btn_pos}")
         print(f"截图区域: {self.screenshot_region}")
-
-
 
 
 def main():
@@ -94,8 +86,10 @@ def main():
         start_from = int(input("从第几题开始? (默认从1开始): ") or 1)
 
         # 确认开始
-        confirm = input(f"即将从第{start_from}题处理到第{total_questions}题，确认开始？(y/n): ").lower()
-        if confirm == 'y' or confirm == '':
+        confirm = input(
+            f"即将从第{start_from}题处理到第{total_questions}题，确认开始？(y/n): "
+        ).lower()
+        if confirm == "y" or confirm == "":
             print("\n请确保浏览器已打开并在目标页面")
             print("程序将在5秒后开始，请切换到浏览器窗口...")
             for i in range(5, 0, -1):

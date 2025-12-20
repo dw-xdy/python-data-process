@@ -13,6 +13,8 @@ from datetime import datetime
     个人认为速度可以接受的, 测试结果: 1000页的PDF转图片(默认的200DPI)需要时间为58s
     后续应该还会继续优化的.  
 """
+
+
 def pdf_to_images(pdf_path, output_folder, dpi=200):
     """
     将单个PDF文件转换为PNG图片
@@ -54,9 +56,11 @@ def pdf_to_images(pdf_path, output_folder, dpi=200):
                 output_path = os.path.join(output_folder, output_filename)
 
                 # 保存图像
-                img.save(output_path, 'PNG', dpi=(dpi, dpi))
+                img.save(output_path, "PNG", dpi=(dpi, dpi))
                 success_count += 1
-                print(f"✓ 已保存第 {page_num + 1} / {total_pages} 页: {output_filename}")
+                print(
+                    f"✓ 已保存第 {page_num + 1} / {total_pages} 页: {output_filename}"
+                )
 
             except Exception as page_error:
                 print(f"✗ 第 {page_num + 1} 页转换失败: {page_error}")
@@ -67,9 +71,13 @@ def pdf_to_images(pdf_path, output_folder, dpi=200):
             doc.close()
 
         if success_count == total_pages:
-            print(f"✅ 完成转换: {pdf_name}.pdf ({success_count} / {total_pages} 页全部成功)")
+            print(
+                f"✅ 完成转换: {pdf_name}.pdf ({success_count} / {total_pages} 页全部成功)"
+            )
         else:
-            print(f"⚠️  部分完成: {pdf_name}.pdf ({success_count} / {total_pages} 页成功)")
+            print(
+                f"⚠️  部分完成: {pdf_name}.pdf ({success_count} / {total_pages} 页成功)"
+            )
 
         return success_count, total_pages
 
@@ -94,7 +102,7 @@ def batch_pdf_to_png(input_folder, output_folder=None, dpi=200):
     """
     # 设置输出文件夹
     if output_folder is None:
-        output_folder = os.path.join(input_folder, 'png_output')
+        output_folder = os.path.join(input_folder, "png_output")
 
     # 创建输出文件夹（如果不存在）
     os.makedirs(output_folder, exist_ok=True)
@@ -170,7 +178,6 @@ def main():
     print("\n开始转换...")
     print("-" * 50)
 
-
     start = int(datetime.now().timestamp())
     log.info(f"{start}s")
 
@@ -190,4 +197,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\n\n程序被用户中断")
         sys.exit(0)
-

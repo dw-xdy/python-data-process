@@ -5,6 +5,8 @@ import shutil
 """
 这个代码的意义在于: 需要将一个文件夹中的很多个零散的文件复制到另一个文件夹中.
 """
+
+
 def copy_specified_files():
     # 定义文件列表
     file_list = []
