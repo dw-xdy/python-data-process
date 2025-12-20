@@ -1,7 +1,8 @@
+from traceback import print_tb
+
 import polars as pl
 import numpy as np
-from src.utils import RegexConstants
-
+import re
 
 """
 关于编码问题:
@@ -10,7 +11,7 @@ from src.utils import RegexConstants
 """
 
 # 文件路径
-csv_file = r'F:\备份\2_姐姐给我的词频统计代码用于学习\副本语料（1）.csv'
+csv_file = r"F:\备份\2_姐姐给我的词频统计代码用于学习\副本语料（1）.csv"
 
 # 使用polars对文件进行读取
 df = pl.read_csv(csv_file)
@@ -45,10 +46,25 @@ result = (
     )
     .explode("匹配项")  # 展开列表
     .filter(pl.col("匹配项").is_not_null())
-    .group_by("匹配项")
-    .agg(pl.len().alias("出现次数"))
+    .group_by("匹配项")  # 先根据"匹配项"这一列进行分组
+    #     # .agg(pl.len().alias("出现次数")) # 然后通过 agg() 函数进行统计.
+    .agg(
+        pl.col("匹配项").count().alias("出现次数")
+    )  # 这两种写法是完全一样的, 但是这里的区别我并不是非常明白.
     .sort("出现次数", descending=True)
 )
+
+# result = (
+#     df.select(
+#         pl.col("语料数据")
+#         .str.extract_all(pattern)  # 提取所有匹配
+#         .alias("匹配项")
+#     )
+#     .explode("匹配项")  # 展开列表
+#     .filter(pl.col("匹配项").is_not_null())
+#     .group_by("匹配项").len()  # 先根据"匹配项"这一列进行分组
+#     .sort("len", descending=True)
+# )
 
 print(result)
 
@@ -62,8 +78,5 @@ result_pd = result.to_pandas()
 result_pd.to_csv(
     output_path,
     index=False,  # 不保存索引
-    encoding='gbk',  # Windows中文系统常用,
-    # encoding='utf-8-sig',  # 带BOM的UTF-8，Excel兼容性好
-    # encoding='utf-8',      # 标准UTF-8
+    encoding="utf-8-sig",  # 既支持特殊符号，又能让 Excel 不乱码 (非常好!!!)
 )
-
