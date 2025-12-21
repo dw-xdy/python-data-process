@@ -8,6 +8,7 @@ import polars as pl
     关于 .csv 文件的写入来说, polars 也是默认写入的是 UTF-8 编码.
     若是需要别的编码方式, 
     那么推荐使用 to_pandas 方法转成pandas类型再进行编码 (推荐使用utf-8-sig编码)
+    当然也可以选择使用.xlsx读取, 用.csv输出, 或者反过来, 这完全是看自己的想法了.
 """
 
 # 文件路径
@@ -16,10 +17,7 @@ csv_file = r"F:\备份\2_姐姐给我的词频统计代码用于学习\副本语
 # 使用polars对文件进行读取
 df = pl.read_csv(csv_file)
 
-reg = r"\[\[\[(.*?不堪.*?)\]\]\]"
-
 pattern = r"\[\[\[([\u4E00-\u9FA5]{2}不堪)\]\]\]"
-
 
 result = (
     df.select(

@@ -9,6 +9,7 @@ import polars as pl
     读取: fastexcel   
     写入: xlsxwriter
     所以使用polars处理.xlsx文件不用关心编码问题.
+    当然也可以选择使用.xlsx读取, 用.csv输出, 或者反过来, 这完全是看自己的想法了.
 """
 
 # 文件路径
@@ -16,8 +17,6 @@ xlsx_file = r"F:\备份\2_姐姐给我的词频统计代码用于学习\副本�
 
 # 使用polars对文件进行读取
 df = pl.read_excel(xlsx_file)
-
-reg = r"\[\[\[(.*?不堪.*?)\]\]\]"
 
 pattern = r"\[\[\[([\u4E00-\u9FA5]{2}不堪)\]\]\]"
 
