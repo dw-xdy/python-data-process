@@ -1,13 +1,19 @@
-from traceback import print_tb
-
 import polars as pl
-import numpy as np
-import re
 
 """
 关于编码问题:
     一般来说windows系统应该都是要转成 gbk 编码
-    但是对于读取来说, polars一般都是要读取 UTF-8 编码
+    但是对于.xlsx来说, 一定是 UTF-8 编码(.xlsx只支持这一种格式),  
+    对于读取.csv文件来说, polars必须要读取 UTF-8 编码
+    所以一定要将 .csv 文件编码转成utf-8编码再进行读取.
+    关于 .csv 文件的写入来说, polars 也是默认写入的是 UTF-8 编码.
+    若是需要别的编码方式, 
+    那么推荐使用 to_pandas 方法转成pandas类型再进行编码 (推荐使用utf-8-sig编码)
+    polars没有原生的方式进行读取, 写入 .xlsx 文件
+    所以需要两个额外的依赖: 
+    读取: fastexcel   
+    写入: xlsxwriter
+    所以使用polars处理.xlsx文件不用关心编码问题.
 """
 
 # 文件路径
@@ -47,7 +53,7 @@ result = (
     .explode("匹配项")  # 展开列表
     .filter(pl.col("匹配项").is_not_null())
     .group_by("匹配项")  # 先根据"匹配项"这一列进行分组
-    #     # .agg(pl.len().alias("出现次数")) # 然后通过 agg() 函数进行统计.
+    # .agg(pl.len().alias("出现次数")) # 然后通过 agg() 函数进行统计.
     .agg(
         pl.col("匹配项").count().alias("出现次数")
     )  # 这两种写法是完全一样的, 但是这里的区别我并不是非常明白.
@@ -68,15 +74,21 @@ result = (
 
 print(result)
 
-# 写入CSV文件
-output_path = r"C:\Users\asus\Desktop\学校作业\kaishi\匹配结果1.csv"
+# 写入excel文件
+output_path = r"C:\Users\asus\Desktop\学校作业\kaishi\匹配结果.xlsx"
 
+result.write_excel(output_path)
+
+print(f"转换成功")
+
+
+# 这里可以将其用.csv文件进行保存.并且可以指定编码
 # 转换为pandas DataFrame，然后使用pandas的to_csv方法
-result_pd = result.to_pandas()
-
-# 指定编码保存（支持多种编码）
-result_pd.to_csv(
-    output_path,
-    index=False,  # 不保存索引
-    encoding="utf-8-sig",  # 既支持特殊符号，又能让 Excel 不乱码 (非常好!!!)
-)
+# result_pd = result.to_pandas()
+#
+# # 指定编码保存（支持多种编码）
+# result_pd.to_csv(
+#     output_path,
+#     index=False,  # 不保存索引
+#     encoding="utf-8-sig",  # 既支持特殊符号，又能让 Excel 不乱码 (非常好!!!)
+# )
