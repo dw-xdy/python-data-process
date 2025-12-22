@@ -1,7 +1,7 @@
 import polars as pl
 import re
 
-class schoolExamDataProcess:
+class SchoolExamDataProcess:
 
     def data_process(self,
                      input_file: str,
