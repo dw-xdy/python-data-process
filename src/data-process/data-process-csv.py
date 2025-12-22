@@ -28,7 +28,8 @@ result = (
     )
     .explode("匹配项")  # 展开列表
     .filter(pl.col("匹配项").is_not_null())
-    .group_by("匹配项").len()  # 先根据"匹配项"这一列进行分组
+    .group_by("匹配项")
+    .len()  # 先根据"匹配项"这一列进行分组
     .sort("len", descending=True)
 )
 

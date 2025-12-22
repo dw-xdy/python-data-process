@@ -4,8 +4,6 @@ import fitz  # PyMuPDF
 from PIL import Image
 import glob
 import sys
-from loguru import logger as log
-from datetime import datetime
 
 """
 工具说明:
@@ -178,15 +176,8 @@ def main():
     print("\n开始转换...")
     print("-" * 50)
 
-    start = int(datetime.now().timestamp())
-    log.info(f"{start}s")
-
     # 执行批量转换
     batch_pdf_to_png(input_folder, output_folder, dpi)
-
-    end = int(datetime.now().timestamp())
-    log.info(f"{end}s")
-    log.success(f"{end - start}s")
 
     input("\n按回车键退出...")
 

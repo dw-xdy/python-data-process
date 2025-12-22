@@ -1,16 +1,17 @@
 import polars as pl
 import re
 
-class SchoolExamDataProcess:
 
-    def data_process(self,
-                     input_file: str,
-                     output_file: str,
-                     judge_column: str,
-                     keep_row: list[str],
-                     keep_column: list[str],
-                     pattern: str,
-                     ) -> None:
+class SchoolExamDataProcess:
+    def data_process(
+        self,
+        input_file: str,
+        output_file: str,
+        judge_column: str,
+        keep_row: list[str],
+        keep_column: list[str],
+        pattern: str,
+    ) -> None:
         """
         关于这个方法:  是用来整理学校发的excel表中的数据, 并进行清洗,
         可以根据需求决定是否需要转换成: word, 或者进一步转换成: PDF,
@@ -31,13 +32,7 @@ class SchoolExamDataProcess:
         # keep_column = ["题干", "正确答案", "选项A", "选项B", "选项C", "选项D"]
         # keep_row = ["单选题", "多选题", "判断题", "应用题"]
 
-        ans = df.filter((pl.col(judge_column).is_in(keep_row))).select(pl.col(keep_column))
+        ans = df.filter((pl.col(judge_column).is_in(keep_row))).select(
+            pl.col(keep_column)
+        )
         ans.write_excel(output_file)
-
-
-
-
-
-
-
-
