@@ -1,9 +1,13 @@
+from pathlib import Path
+from typing import Union
+
 import polars as pl
+from jinja2.nodes import Output
 
 
 def excel_data_process(
-    input_file: str,
-    output_file: str,
+    input_file: Union[str, Path],    # 支持字符串或Path
+    output_file: Union[str, Path],   # 支持字符串或Path
     judge_column: str,
     keep_row: list[str],
     keep_column: list[str],
@@ -24,7 +28,9 @@ def excel_data_process(
     # keep_row = ["单选题", "多选题", "判断题", "应用题"]
     try:
         df = pl.read_excel(input_file)
-        ans = df.filter(pl.col(judge_column).is_in(keep_row)).select(pl.col(keep_column))
+        ans = df.filter(pl.col(judge_column).is_in(keep_row)).select(
+            pl.col(keep_column)
+        )
         ans.write_excel(output_file)
         print("转换完成")
     except Exception as e:
@@ -34,14 +40,50 @@ def excel_data_process(
 
 
 
-excel_file = r"C:\Users\asus\Desktop\学校作业\信息论第二章测试_习题导出.xlsx"
+def batch_excel_data_process(
+        input_folder: str,
+        judge_column: str,
+        keep_row: list[str],
+        keep_column: list[str],
+        output_folder: str = None,
+) -> None:
+    # 转换为 Path 对象
+    input_path = Path(input_folder)
 
-output_file = r"C:\Users\asus\Desktop\学校作业\kaishi\信息论.xlsx"
+    # 设置输出路径
+    output_path = Path(output_folder) if output_folder else input_path / "excel_output"
+    output_path.mkdir(parents=True, exist_ok=True)
 
-judge_list = "题型"
+    # 获取 Excel 文件列表（Path 对象列表）
+    excel_files = list(input_path.glob("*.xlsx"))
 
-keep_row = ["单选题"]
+    if not excel_files:
+        print(f"在文件夹 '{input_path}' 中没有找到Excel文件")
+        return
 
-keep_column = ["题干", "正确答案", "选项A", "选项B", "选项C", "选项D"]
+    print(f"找到 {len(excel_files)} 个Excel文件")
+    print(f"输出文件夹: {output_path}")
+    print("-" * 50)
 
-excel_data_process(excel_file, output_file, judge_list, keep_row, keep_column)
+    for excel_file in excel_files:
+        print(f"\n正在处理: {excel_file.name}")
+
+        input_file = excel_file
+        output_file = output_path / excel_file.name
+
+        excel_data_process(
+            input_file,
+            output_file,
+            judge_column,
+            keep_row,
+            keep_column,
+        )
+
+        print(f"{excel_file.name}处理完成")
+
+    # 显示输出文件夹内容
+    excel_files_finish = list(output_folder.glob("*.xlsx"))
+    if excel_files_finish:
+        print(f"生成Excel文件数量: {len(excel_files_finish)} 个")
+    else:
+        print("警告: 输出文件夹中没有找到Excel文件")
