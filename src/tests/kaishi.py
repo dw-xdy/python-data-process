@@ -1,7 +1,5 @@
 import polars as pl
 import re
-from loguru import logger as log
-from datetime import datetime
 
 
 # 文件路径
@@ -20,7 +18,6 @@ for ret in res:
     enough = ret.replace("[[[", "").replace("]]]", "")
     good_list.append(enough)
 
-start = datetime.now().timestamp()
 
 from pkuseg import pkuseg  # 导入类
 
@@ -33,13 +30,6 @@ seg = pkuseg()
 
 for ret in good_list:
     ans_list.append(seg.cut(ret))
-
-end = datetime.now().timestamp()
-
-log.info(f"{end - start}s")
-
-
-start = datetime.now().timestamp()
 
 for ans in ans_list:
     for true_ans in ans:
@@ -55,10 +45,6 @@ print(kaishi)
 output_path = r"C:\Users\asus\Desktop\学校作业\kaishi\匹配结果123.xlsx"
 
 kaishi.write_excel(output_path)
-
-end = datetime.now().timestamp()
-
-log.info(f"{end - start}s")
 
 
 
