@@ -11,6 +11,21 @@ from docx.oxml.ns import qn
 # PDF处理
 from docx2pdf import convert
 
+"""
+    这个文件的作用是: 将excel中的数据进行处理, 
+    然后生成对应的 word 文件, 最后转成 PDF 文件
+    实现逻辑: 每一个处理都是对单个文件的处理, 然后在套上一个方法: 批处理调度器
+    本质逻辑还是单个文件处理. 主要是处理一些简单的excel表格, 
+    若是特殊表格, 那么只能是特殊情况特殊处理了.
+    excel --> word 方法都将其单独整理出来了.
+    word --> PDF 方法都将其单独整理出来了.
+    所以也可以直接调用, 该有的说明都有.
+    
+    # TODO
+        还差边界情况的处理和 main 函数的逻辑流程没有完成
+"""
+
+
 # 这里的两个代码是进行将 excel 进行批量整理的代码
 def excel_data_process(
     input_file: str | Path,  # 支持字符串或Path
@@ -114,7 +129,6 @@ def batch_excel_data_process(
 
 
 
-
 # --- 这里的代码是将 excel 中的数据批量导入 word 并整理好格式的代码 ---
 
 def set_global_font(doc, font_name):
@@ -211,6 +225,7 @@ def batch_process_folder(source_dir, output_dir):
 
 
 
+# 将一个文件夹中的 Excel 批量转为 PDF .
 
 def convert_single_word_to_pdf(word_path, pdf_path=None):
     """
