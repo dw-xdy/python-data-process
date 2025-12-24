@@ -65,21 +65,26 @@ def batch_convert():
 
     # 2. 交互逻辑：询问用户是想选“文件”还是“文件夹”
     # 虽然可以通过一个窗口实现，但为了逻辑清晰，建议先弹个简单的询问框
-    mode = messagebox.askyesnocancel("选择模式", "点击 [是/Yes] 选择多个文件\n点击 [否/No] 选择整个文件夹")
+    mode = messagebox.askyesnocancel(
+        "选择模式", "点击 [是/Yes] 选择多个文件\n点击 [否/No] 选择整个文件夹"
+    )
 
     file_paths = []
 
     if mode is True:  # 用户选了“文件”
         file_paths = filedialog.askopenfilenames(
             title="请选择 .doc 文件（支持多选）",
-            filetypes=[("Word 97-2003 文档", "*.doc")]
+            filetypes=[("Word 97-2003 文档", "*.doc")],
         )
     elif mode is False:  # 用户选了“文件夹”
         folder_selected = filedialog.askdirectory(title="请选择包含 .doc 文件的文件夹")
         if folder_selected:
             # 遍历文件夹下所有 .doc 文件
-            file_paths = [os.path.join(folder_selected, f) for f in os.listdir(folder_selected)
-                          if f.lower().endswith('.doc') and not f.startswith('~$')]
+            file_paths = [
+                os.path.join(folder_selected, f)
+                for f in os.listdir(folder_selected)
+                if f.lower().endswith(".doc") and not f.startswith("~$")
+            ]
     else:  # 用户点了取消
         return
 
@@ -92,7 +97,7 @@ def batch_convert():
 
     try:
         # 确保只启动一次 Word 进程以节省开销
-        word = win32.gencache.EnsureDispatch('Word.Application')
+        word = win32.gencache.EnsureDispatch("Word.Application")
         word.Visible = False
 
         success_count = 0
