@@ -1,4 +1,5 @@
 # 文件路径处理
+import sys
 from pathlib import Path
 
 # excel处理
@@ -246,29 +247,199 @@ def batch_convert_folder_to_pdf(source_dir, output_dir):
     except Exception as e:
         print(f"⚠️ 批量转换过程中出现问题: {e}")
 
-# 这里将来的输入函数,
-# 但是还是有点问题毕竟最后是一个 main 函数进行调用了, 所以调用逻辑我还需要思考
-# input_folder = r"C:\Users\asus\Desktop\学校作业\信息论"
-# output_folder = None
-#
-#
-# header_row = int(input("请输入你想要作为列名的那一行(从 1 开始数): "))
-#
-# # # 输入示例: 题型
-# judge_column = input(
-#     "请输入用于判断的列(通过这一列的数据来判断留下哪些行, 只能输入一个字符串): "
-# )
-#
-#
-# # # 输入示例：单选题 多选题
-# keep_row = list(
-#     input("请输入你想要保留的行(judge_column中你想要留下的行): ").split(" ")
-# )
-#
-#
-# # # 输入示例：题干 正确答案 选项A 选项B 选项C 选项D
-# keep_column = list(input("请输入你想要保留的列: ").split(" "))
-#
-# batch_excel_data_process(
-#     input_folder, judge_column, keep_row, keep_column, header_row, output_folder
-# )
+
+
+# 假设你的上述函数都在同一个模块中
+
+def main():
+    """
+    主函数 - 提供交互式菜单选择处理流程
+    """
+    print("=" * 60)
+    print("Excel 数据清洗与文档转换工具")
+    print("=" * 60)
+
+    while True:
+        print("\n请选择要执行的操作：")
+        print("1. 批量清洗 Excel 数据")
+        print("2. 批量将 Excel 转换为 Word 文档")
+        print("3. 批量将 Word 文档转换为 PDF")
+        print("4. 完整流程（Excel → Word → PDF）")
+        print("5. 退出程序")
+
+        choice = input("\n请输入选项 (1-5): ").strip()
+
+        if choice == "1":
+            process_excel_cleaning()
+        elif choice == "2":
+            process_excel_to_word()
+        elif choice == "3":
+            process_word_to_pdf()
+        elif choice == "4":
+            process_full_workflow()
+        elif choice == "5":
+            print("感谢使用，再见！")
+            sys.exit(0)
+        else:
+            print("❌ 无效选项，请重新选择")
+
+
+def get_input_path(prompt: str, default: str = "") -> Path:
+    """获取输入路径"""
+    path_str = input(prompt + (f" [默认: {default}]" if default else ""))
+    path_str = path_str.strip() if path_str.strip() else default
+    return Path(path_str)
+
+
+def process_excel_cleaning():
+    """处理流程1：批量清洗Excel数据"""
+    print("\n" + "=" * 40)
+    print("Excel 数据清洗")
+    print("=" * 40)
+
+    input_folder = get_input_path("请输入Excel文件夹路径: ")
+    output_folder = get_input_path("请输入输出文件夹路径（回车则使用默认）: ",
+                                   str(input_folder / "cleaned_excel"))
+
+    # 获取清洗参数
+    try:
+        header_row = int(input("请输入标题行号（从1开始）: "))
+        judge_column = input("请输入判断列名: ")
+        keep_row_input = input("请输入要保留的行内容（用空格分隔）: ")
+        keep_column_input = input("请输入要保留的列名（用空格分隔）: ")
+
+        keep_row = keep_row_input.strip().split()
+        keep_column = keep_column_input.strip().split()
+
+        print("\n正在处理...")
+        batch_excel_data_process(
+            input_folder=str(input_folder),
+            output_folder=str(output_folder),
+            header_row=header_row,
+            judge_column=judge_column,
+            keep_row=keep_row,
+            keep_column=keep_column
+        )
+
+    except ValueError as e:
+        print(f"❌ 输入参数错误: {e}")
+    except Exception as e:
+        print(f"❌ 处理过程中出现错误: {e}")
+
+
+def process_excel_to_word():
+    """处理流程2：Excel转Word"""
+    print("\n" + "=" * 40)
+    print("Excel 转 Word 文档")
+    print("=" * 40)
+
+    input_folder = get_input_path("请输入Excel文件夹路径: ")
+    output_folder = get_input_path("请输入Word输出文件夹路径（回车则使用默认）: ",
+                                   str(input_folder / "word_output"))
+
+    print("\n正在处理...")
+    try:
+        batch_process_folder(
+            source_dir=str(input_folder),
+            output_dir=str(output_folder)
+        )
+        print(f"\n✅ Word文档已保存到: {output_folder}")
+    except Exception as e:
+        print(f"❌ 处理过程中出现错误: {e}")
+
+
+def process_word_to_pdf():
+    """处理流程3：Word转PDF"""
+    print("\n" + "=" * 40)
+    print("Word 文档转 PDF")
+    print("=" * 40)
+
+    input_folder = get_input_path("请输入Word文件夹路径: ")
+    output_folder = get_input_path("请输入PDF输出文件夹路径（回车则使用默认）: ",
+                                   str(input_folder / "pdf_output"))
+
+    print("\n正在处理...")
+    try:
+        batch_convert_folder_to_pdf(
+            source_dir=str(input_folder),
+            output_dir=str(output_folder)
+        )
+    except Exception as e:
+        print(f"❌ 处理过程中出现错误: {e}")
+
+
+def process_full_workflow():
+    """处理流程4：完整工作流（Excel → Word → PDF）"""
+    print("\n" + "=" * 40)
+    print("完整工作流：Excel → Word → PDF")
+    print("=" * 40)
+
+    input_folder = get_input_path("请输入Excel源文件夹路径: ")
+
+    # 询问是否需要Excel清洗
+    need_cleaning = input("是否需要先清洗Excel数据？(y/n): ").strip().lower()
+
+    if need_cleaning == 'y':
+        # 清洗Excel
+        cleaned_folder = input_folder / "cleaned_excel"
+        print("\n第一步：Excel数据清洗")
+
+        try:
+            header_row = int(input("请输入标题行号（从1开始）: "))
+            judge_column = input("请输入判断列名: ")
+            keep_row_input = input("请输入要保留的行内容（用空格分隔）: ")
+            keep_column_input = input("请输入要保留的列名（用空格分隔）: ")
+
+            keep_row = keep_row_input.strip().split()
+            keep_column = keep_column_input.strip().split()
+
+            batch_excel_data_process(
+                input_folder=str(input_folder),
+                output_folder=str(cleaned_folder),
+                header_row=header_row,
+                judge_column=judge_column,
+                keep_row=keep_row,
+                keep_column=keep_column
+            )
+            # 更新输入文件夹为清洗后的文件夹
+            input_folder = cleaned_folder
+
+        except Exception as e:
+            print(f"❌ Excel清洗失败: {e}")
+            return
+
+    # Excel转Word
+    word_folder = input_folder / "word_output"
+    print("\n第二步：Excel转Word")
+    try:
+        batch_process_folder(
+            source_dir=str(input_folder),
+            output_dir=str(word_folder)
+        )
+        print(f"✅ Word文档已保存到: {word_folder}")
+    except Exception as e:
+        print(f"❌ Excel转Word失败: {e}")
+        return
+
+    # Word转PDF
+    pdf_folder = input_folder / "pdf_output"
+    print("\n第三步：Word转PDF")
+    try:
+        batch_convert_folder_to_pdf(
+            source_dir=str(word_folder),
+            output_dir=str(pdf_folder)
+        )
+        print(f"✅ PDF文档已保存到: {pdf_folder}")
+    except Exception as e:
+        print(f"❌ Word转PDF失败: {e}")
+        return
+
+    print("\n✨ 完整工作流处理完成！")
+    print(f"原始文件: {input_folder}")
+    print(f"Word文档: {word_folder}")
+    print(f"PDF文档: {pdf_folder}")
+
+
+if __name__ == "__main__":
+    # 可以添加命令行参数支持
+    main()
