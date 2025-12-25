@@ -25,7 +25,7 @@ from docx2pdf import convert
     所以也可以直接调用, 该有的说明都有.
     
     # TODO
-        还差边界情况的处理和 main 函数的逻辑流程没有完成
+        还差word边界情况的处理没有完成
 """
 
 
@@ -226,11 +226,9 @@ def batch_process_folder(source_dir, output_dir):
 
 
 # 将一个文件夹中的 Excel 批量转为 PDF .
-# 这个批量处理的方法已经完全足够了, 并不需要和上面一样进行套壳. docx2pdf 的 convert 已经可以处理的非常好了.
-def batch_convert_folder_to_pdf(source_dir, output_dir):
-    """
-    批量将文件夹中的所有 Word 转换为 PDF 并移动到指定目录
-    """
+# 这个批量处理的方法已经完全足够了, 并不需要和上面一样进行套壳.
+# docx2pdf 的 convert 已经可以处理的非常好了.
+def convert_word_to_pdf(source_dir, output_dir):
     src_path = Path(source_dir)
     out_path = Path(output_dir)
 
@@ -262,7 +260,6 @@ def main():
     while True:
         print("\n请选择要执行的操作：")
         print("1. 批量清洗 Excel 数据")
-        print("2. 批量将 Excel 转换为 Word 文档")
         print("3. 批量将 Word 文档转换为 PDF")
         print("4. 完整流程（Excel → Word → PDF）")
         print("5. 退出程序")
@@ -271,8 +268,6 @@ def main():
 
         if choice == "1":
             process_excel_cleaning()
-        elif choice == "2":
-            process_excel_to_word()
         elif choice == "3":
             process_word_to_pdf()
         elif choice == "4":
@@ -327,27 +322,6 @@ def process_excel_cleaning():
         print(f"❌ 处理过程中出现错误: {e}")
 
 
-def process_excel_to_word():
-    """处理流程2：Excel转Word"""
-    print("\n" + "=" * 40)
-    print("Excel 转 Word 文档")
-    print("=" * 40)
-
-    input_folder = get_input_path("请输入Excel文件夹路径: ")
-    output_folder = get_input_path("请输入Word输出文件夹路径（回车则使用默认）: ",
-                                   str(input_folder / "word_output"))
-
-    print("\n正在处理...")
-    try:
-        batch_process_folder(
-            source_dir=str(input_folder),
-            output_dir=str(output_folder)
-        )
-        print(f"\n✅ Word文档已保存到: {output_folder}")
-    except Exception as e:
-        print(f"❌ 处理过程中出现错误: {e}")
-
-
 def process_word_to_pdf():
     """处理流程3：Word转PDF"""
     print("\n" + "=" * 40)
@@ -360,7 +334,7 @@ def process_word_to_pdf():
 
     print("\n正在处理...")
     try:
-        batch_convert_folder_to_pdf(
+        convert_word_to_pdf(
             source_dir=str(input_folder),
             output_dir=str(output_folder)
         )
@@ -425,7 +399,7 @@ def process_full_workflow():
     pdf_folder = input_folder / "pdf_output"
     print("\n第三步：Word转PDF")
     try:
-        batch_convert_folder_to_pdf(
+        convert_word_to_pdf(
             source_dir=str(word_folder),
             output_dir=str(pdf_folder)
         )
@@ -441,5 +415,4 @@ def process_full_workflow():
 
 
 if __name__ == "__main__":
-    # 可以添加命令行参数支持
     main()
