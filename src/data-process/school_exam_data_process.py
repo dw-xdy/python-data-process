@@ -1,13 +1,15 @@
 # 文件路径处理
-import os
 from pathlib import Path
+
 # excel处理
 import polars as pl
+
 # word处理
 from docx import Document
 from docx.shared import Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
+
 # PDF处理
 from docx2pdf import convert
 
@@ -126,14 +128,12 @@ def batch_excel_data_process(
         print("警告: 输出文件夹中没有找到Excel文件")
 
 
-
-
-
 # --- 这里的代码是将 excel 中的数据批量导入 word 并整理好格式的代码 ---
+
 
 def set_global_font(doc, font_name):
     """设置文档全局中西文字体"""
-    style = doc.styles['Normal']
+    style = doc.styles["Normal"]
     style.font.name = font_name
     style.font.size = Pt(11)
 
@@ -158,13 +158,13 @@ def save_as_pretty_word(df, output_path, title_text="复习题库"):
     records = df.to_dicts()
 
     for i, row in enumerate(records, 1):
-        # A. 题干 (加粗, 12pt)
+        # 1. 题干 (加粗, 12pt)
         p = doc.add_paragraph()
         run = p.add_run(f"{i}. {row['题干']}")
         run.bold = True
         run.font.size = Pt(12)
 
-        # B. 选项 (A,B,C,D)
+        # 2. 选项 (A,B,C,D)
         for opt in ["A", "B", "C", "D"]:
             col_name = f"选项{opt}"
             # 检查列是否存在且不为空
@@ -173,14 +173,14 @@ def save_as_pretty_word(df, output_path, title_text="复习题库"):
                 opt_run = opt_p.add_run(f"{opt}. {row[col_name]}")
                 opt_run.font.bold = True
 
-        # C. 正确答案 (深蓝色, 10pt)
+        # 3. 正确答案 (深蓝色, 10pt)
         ans_p = doc.add_paragraph()
         ans_run = ans_p.add_run(f"【正确答案】：{row['正确答案']}")
         ans_run.font.color.rgb = RGBColor(0, 102, 204)
         ans_run.font.size = Pt(10)
         ans_run.font.bold = True
 
-        # D. 分割线
+        # 4. 分割线
         doc.add_paragraph("-" * 80)
 
     doc.save(output_path)
@@ -224,25 +224,8 @@ def batch_process_folder(source_dir, output_dir):
             print(f"⚠️ 处理文件 {file.name} 时发生异常: {e}")
 
 
-
 # 将一个文件夹中的 Excel 批量转为 PDF .
-
-def convert_single_word_to_pdf(word_path, pdf_path=None):
-    """
-    将单个 Word 文件转换为 PDF
-    :param word_path: 源 docx 文件路径
-    :param pdf_path: 目标 pdf 路径（如果不填，默认在同级目录生成同名 pdf）
-    """
-    try:
-        print(f"正在转换单个文件: {os.path.basename(word_path)}...")
-        # docx2pdf 的 convert 函数非常智能
-        # 如果只传一个参数，它会在原地生成 PDF
-        convert(word_path, pdf_path)
-        print(f"✅ 转换成功!")
-    except Exception as e:
-        print(f"❌ 转换失败: {e}")
-
-
+# 这个批量处理的方法已经完全足够了, 并不需要和上面一样进行套壳. docx2pdf 的 convert 已经可以处理的非常好了.
 def batch_convert_folder_to_pdf(source_dir, output_dir):
     """
     批量将文件夹中的所有 Word 转换为 PDF 并移动到指定目录
