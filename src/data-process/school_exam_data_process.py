@@ -189,6 +189,7 @@ def save_as_pretty_word(df, output_path, title_text="复习题库"):
 
 # --- 批量处理逻辑 ---
 
+
 def batch_process_folder(source_dir, output_dir):
     """
     遍历 source_dir 下所有 Excel，转换并保存到 output_dir
@@ -246,8 +247,8 @@ def convert_word_to_pdf(source_dir, output_dir):
         print(f"⚠️ 批量转换过程中出现问题: {e}")
 
 
-
 # 假设你的上述函数都在同一个模块中
+
 
 def main():
     """
@@ -293,8 +294,9 @@ def process_excel_cleaning():
     print("=" * 40)
 
     input_folder = get_input_path("请输入Excel文件夹路径: ")
-    output_folder = get_input_path("请输入输出文件夹路径（回车则使用默认）: ",
-                                   str(input_folder / "cleaned_excel"))
+    output_folder = get_input_path(
+        "请输入输出文件夹路径（回车则使用默认）: ", str(input_folder / "cleaned_excel")
+    )
 
     # 获取清洗参数
     try:
@@ -313,7 +315,7 @@ def process_excel_cleaning():
             header_row=header_row,
             judge_column=judge_column,
             keep_row=keep_row,
-            keep_column=keep_column
+            keep_column=keep_column,
         )
 
     except ValueError as e:
@@ -329,15 +331,13 @@ def process_word_to_pdf():
     print("=" * 40)
 
     input_folder = get_input_path("请输入Word文件夹路径: ")
-    output_folder = get_input_path("请输入PDF输出文件夹路径（回车则使用默认）: ",
-                                   str(input_folder / "pdf_output"))
+    output_folder = get_input_path(
+        "请输入PDF输出文件夹路径（回车则使用默认）: ", str(input_folder / "pdf_output")
+    )
 
     print("\n正在处理...")
     try:
-        convert_word_to_pdf(
-            source_dir=str(input_folder),
-            output_dir=str(output_folder)
-        )
+        convert_word_to_pdf(source_dir=str(input_folder), output_dir=str(output_folder))
     except Exception as e:
         print(f"❌ 处理过程中出现错误: {e}")
 
@@ -353,7 +353,7 @@ def process_full_workflow():
     # 询问是否需要Excel清洗
     need_cleaning = input("是否需要先清洗Excel数据？(y/n): ").strip().lower()
 
-    if need_cleaning == 'y':
+    if need_cleaning == "y":
         # 清洗Excel
         cleaned_folder = input_folder / "cleaned_excel"
         print("\n第一步：Excel数据清洗")
@@ -373,7 +373,7 @@ def process_full_workflow():
                 header_row=header_row,
                 judge_column=judge_column,
                 keep_row=keep_row,
-                keep_column=keep_column
+                keep_column=keep_column,
             )
             # 更新输入文件夹为清洗后的文件夹
             input_folder = cleaned_folder
@@ -386,10 +386,7 @@ def process_full_workflow():
     word_folder = input_folder / "word_output"
     print("\n第二步：Excel转Word")
     try:
-        batch_process_folder(
-            source_dir=str(input_folder),
-            output_dir=str(word_folder)
-        )
+        batch_process_folder(source_dir=str(input_folder), output_dir=str(word_folder))
         print(f"✅ Word文档已保存到: {word_folder}")
     except Exception as e:
         print(f"❌ Excel转Word失败: {e}")
@@ -399,10 +396,7 @@ def process_full_workflow():
     pdf_folder = input_folder / "pdf_output"
     print("\n第三步：Word转PDF")
     try:
-        convert_word_to_pdf(
-            source_dir=str(word_folder),
-            output_dir=str(pdf_folder)
-        )
+        convert_word_to_pdf(source_dir=str(word_folder), output_dir=str(pdf_folder))
         print(f"✅ PDF文档已保存到: {pdf_folder}")
     except Exception as e:
         print(f"❌ Word转PDF失败: {e}")
