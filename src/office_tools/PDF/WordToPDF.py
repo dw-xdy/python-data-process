@@ -3,22 +3,6 @@ from pathlib import Path
 from docx2pdf import convert
 
 
-def convert_single_word_to_pdf(word_path, pdf_path=None):
-    """
-    将单个 Word 文件转换为 PDF
-    :param word_path: 源 docx 文件路径
-    :param pdf_path: 目标 pdf 路径（如果不填，默认在同级目录生成同名 pdf）
-    """
-    try:
-        print(f"正在转换单个文件: {os.path.basename(word_path)}...")
-        # docx2pdf 的 convert 函数非常智能
-        # 如果只传一个参数，它会在原地生成 PDF
-        convert(word_path, pdf_path)
-        print(f"✅ 转换成功!")
-    except Exception as e:
-        print(f"❌ 转换失败: {e}")
-
-
 def batch_convert_folder_to_pdf(source_dir, output_dir):
     """
     批量将文件夹中的所有 Word 转换为 PDF 并移动到指定目录
