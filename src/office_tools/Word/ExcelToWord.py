@@ -5,10 +5,11 @@ from docx.shared import Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
 
+
 # --- 代码是将 excel 中的数据批量导入 word 并整理好格式的代码 ---
 def set_global_font(doc, font_name):
     """设置文档全局中西文字体"""
-    style = doc.styles['Normal']
+    style = doc.styles["Normal"]
     style.font.name = font_name
     style.font.size = Pt(11)
 
@@ -62,6 +63,7 @@ def save_as_pretty_word(df, output_path, title_text="复习题库"):
 
 
 # --- 批量处理逻辑 ---
+
 
 def batch_process_folder(source_dir, output_dir):
     """
