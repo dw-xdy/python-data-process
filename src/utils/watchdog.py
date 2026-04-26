@@ -1,18 +1,14 @@
 import os
 import glob
+import re
 
 
 def remove_specific_text(content):
     """删除文件中的特定文本块"""
-    # 要删除的文本模式
-    text_to_remove = """-----------------------------------
-本文件来自尚香书苑。
-发布页：sxsy.org
------------------------------------"""
+    # 使用正则表达式匹配所有变体
+    pattern = r"-----------------------------------\n本文件来自尚香书[苑院]。\n发布页：sxsy\.org\n-----------------------------------\n?"
 
-    # 直接替换为空字符串
-    new_content = content.replace(text_to_remove, "")
-
+    new_content = re.sub(pattern, "", content)
     return new_content
 
 
@@ -120,10 +116,6 @@ if __name__ == "__main__":
 
     if os.path.isdir(folder_path):
         print("注意：此操作会直接修改原文件和文件名，建议先备份！")
-        confirm = input("是否继续？(y/n): ").strip().lower()
-        if confirm == "y":
-            process_folder(folder_path)
-        else:
-            print("操作已取消")
+        process_folder(folder_path)
     else:
         print(f"错误：'{folder_path}' 不是一个有效的文件夹路径")
