@@ -3,7 +3,6 @@ import polars as pl
 data_lun_file_csv = r"C:\Users\asus\Desktop\学校作业\信息论第二章测试_习题导出.csv"
 data_lun_file_xlsx = r"C:\Users\asus\Desktop\学校作业\信息论第二章测试_习题导出.xlsx"
 
-
 df = pl.read_excel(data_lun_file_xlsx)
 
 data_list = ["题干", "正确答案", "选项A", "选项B", "选项C", "选项D"]
@@ -12,6 +11,11 @@ data_list = ["题干", "正确答案", "选项A", "选项B", "选项C", "选项D
 ans = df.filter((pl.col("题型") == "单选题")).select(pl.col(data_list))
 
 print(ans)
+
+ans_dicts = ans.to_dicts()
+
+for i, row in enumerate(ans_dicts, 1):
+    print(i, row)
 
 data_lun_output_xlsx_file = (
     r"C:\Users\asus\Desktop\学校作业\kaishi\信息论第二章测试_习题导出.xlsx"

@@ -33,7 +33,7 @@ for ret in good_list:
 
 for ans in ans_list:
     for true_ans in ans:
-        if len(true_ans) == 4 and re.search(r'^[\u4E00-\u9FA5]{2}不堪$', true_ans):
+        if len(true_ans) == 4 and re.search(r"^[\u4E00-\u9FA5]{2}不堪$", true_ans):
             my_list.append(true_ans)
 
 
@@ -45,7 +45,3 @@ print(kaishi)
 output_path = r"C:\Users\asus\Desktop\学校作业\kaishi\匹配结果123.xlsx"
 
 kaishi.write_excel(output_path)
-
-
-
-

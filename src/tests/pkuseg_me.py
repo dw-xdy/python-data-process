@@ -112,4 +112,3 @@ log.info(f"{end - start}")
 # 创建单列DataFrame，列名为"词语"
 enough = pl.DataFrame({"词语": true_ans})
 print(enough)
-

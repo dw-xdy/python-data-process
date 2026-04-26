@@ -1,0 +1,32 @@
+[project]
+name = "python-data-processing"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "customtkinter>=5.2.2",
+    "docx2pdf>=0.1.8",
+    "fake-useragent>=2.2.0",
+    "fastexcel>=0.18.0",
+    "jupyterlab-vim>=4.1.4",
+    "loguru>=0.7.3",
+    "matplotlib>=3.10.8",
+    "notebook>=7.5.1",
+    "numpy>=2.3.5",
+    "pandas>=2.3.3",
+    "pdf2docx>=0.5.8",
+    "pillow>=12.0.0",
+    "pkuseg>=0.0.25",
+    "polars>=1.36.1",
+    "pyarrow>=22.0.0",
+    "pyautogui>=0.9.54",
+    "pymupdf>=1.26.7",
+    "pypdf2>=3.0.1",
+    "python-docx>=1.2.0",
+    "pywin32>=311",
+    "requests>=2.32.5",
+    "ruff>=0.14.10",
+    "watchdog>=6.0.0",
+    "xlsxwriter>=3.2.9",
+]
