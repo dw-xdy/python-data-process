@@ -13,10 +13,6 @@ def remove_specific_text(content):
     # 直接替换为空字符串
     new_content = content.replace(text_to_remove, "")
 
-    # 也可能存在变体：没有换行符的情况
-    text_to_remove_variant = "-----------------------------------\n本文件来自尚香书苑。\n发布页：sxsy.org\n-----------------------------------"
-    new_content = new_content.replace(text_to_remove_variant, "")
-
     return new_content
 
 
@@ -60,6 +56,7 @@ def rename_files(folder_path):
 
         # 删除文件名中的 [sxsy.org]
         new_filename = filename.replace("[sxsy.org]", "")
+        new_filename = new_filename.replace("soushu2025.com@", "")
 
         # 如果文件名有变化
         if new_filename != filename:
