@@ -11,7 +11,6 @@ def remove_specific_text(content):
     new_content = re.sub(pattern, "", content)
     return new_content
 
-
 def replace_quotes_in_file(file_path):
     """替换单个文件中的双引号为直角引号，并删除特定文本"""
     try:
@@ -23,8 +22,10 @@ def replace_quotes_in_file(file_path):
         # 1. 删除特定文本
         content = remove_specific_text(content)
 
-        # 2. 替换左双引号和右双引号为直角引号
-        content = content.replace("“", "「").replace("”", "」")
+        # 2. 使用正则表达式替换双引号为直角引号
+        # 匹配中文左双引号“或英文左双引号"后面跟任意内容，再匹配对应的右双引号
+        # 使用非贪婪匹配 (?<=...) 和 (?=...) 可能会导致问题，改用直接替换模式
+        content = re.sub(r'[“"＂](.*?)[”"＂]', r'「\1」', content)
 
         # 如果内容有变化，则写回文件
         if content != original_content:
@@ -35,7 +36,6 @@ def replace_quotes_in_file(file_path):
     except Exception as e:
         print(f"处理文件 {file_path} 内容时出错: {e}")
         return False
-
 
 def rename_files(folder_path):
     """重命名文件，删除文件名中的 [sxsy.org]"""
