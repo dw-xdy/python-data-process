@@ -109,7 +109,7 @@ def process_folder(folder_path):
 
 if __name__ == "__main__":
     # 请将此处替换为你的文件夹路径
-    folder_path = input("请输入文件夹路径: ").strip()
+    folder_path = r"F:\备份\3_文档文件\小说"
 
     # 去除可能的引号
     folder_path = folder_path.strip('"').strip("'")
