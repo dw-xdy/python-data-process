@@ -40,7 +40,7 @@ def copy_specified_files():
             print(f"文件不存在: {filename}, 请检查文件!!!")
 
     # 输出结果摘要
-    print(f"\n=== 复制完成 ===")
+    print("\n=== 复制完成 ===")
     print(f"成功复制文件: {copied_count} 个")
     print(f"缺失文件: {len(missing_files)} 个")
 

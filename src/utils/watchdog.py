@@ -47,6 +47,7 @@ def rename_files(folder_path):
             filename.replace("[sxsy.org]", "")
             .replace("soushu2025.com@", "")
             .replace("搜书吧", "")
+            .replace("sxsy_org", "")
         )
 
         if new_filename != filename:
@@ -106,11 +107,11 @@ def process_folder(folder_path):
 
     total_elapsed = time.perf_counter() - total_start
 
-    print(f"\n📊 ========== 性能统计 ==========")
+    print("\n📊 ========== 性能统计 ==========")
     print(f"- 重命名文件: {renamed_count} 个")
     print(f"- 修改内容: {processed_count} 个文件")
     print(f"- 总耗时: {total_elapsed:.4f} 秒")
-    print(f"================================\n")
+    print("================================\n")
 
 
 if __name__ == "__main__":
