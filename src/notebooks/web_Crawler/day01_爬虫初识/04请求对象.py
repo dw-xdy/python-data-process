@@ -8,7 +8,7 @@
 
 # 【2】GET请求的特点
 # 所有的请求参数都会携带在路径中
-# 因为携带在路径中 所以请求提数据就不能太大 1MB 之内
+# 因为携带在路径中 所以请求体数据就不能太大 1MB 之内
 
 # 【3】发送get‘请求
 """
@@ -100,11 +100,14 @@ keyword = {
 }
 '''
 print(urlencode(keyword, encoding="utf8"))  # 传入一个字典, 使用utf-8编码进行解析
+# 这两个是一样的，所以对应的，这个可以直接进行解析。
 # wd=%E5%91%A8%E6%9D%B0%E4%BC%A6
 # wd=%E5%91%A8%E6%9D%B0%E4%BC%A6
 '''
+# 目标网址。
 target_url = 'https://www.baidu.com/s?' + urlencode(keyword, encoding="utf8")
 
+# 请求头
 headers = {
     "User-Agent": UserAgent().random
 }
@@ -113,6 +116,7 @@ print(target_url)
 # https://www.baidu.com/s?wd=%E5%91%A8%E6%9D%B0%E4%BC%A6
 # https://www.baidu.com/s?wd=%E5%91%A8%E6%9D%B0%E4%BC%A6
 
+# 接收到的信息。
 response = requests.get(url=target_url, headers=headers)
 response.encoding = "utf8"
 print(response.request.url)
@@ -134,6 +138,7 @@ params = {
 
 target_url = 'https://www.sogou.com/web?'
 
+# 请求一定要带上 headers，并且params 的参数自带了 UTF-8 编码进行解析。
 response = requests.get(url=target_url, headers=headers, params=params)
 
 print(response.text)

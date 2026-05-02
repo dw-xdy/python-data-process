@@ -1,7 +1,6 @@
 from docx import Document
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
-import os
 
 
 def set_run_font(run, font_name):
@@ -116,7 +115,7 @@ def convert_word_font(input_path, output_path, font_name="霞鹜文楷"):
 
     # 保存文档
     doc.save(output_path)
-    print(f"✓ 文档转换完成！")
+    print("✓ 文档转换完成！")
     print(f"  处理段落数: {para_count}")
     print(f"  处理表格数: {table_count}")
     print(f"  保存路径: {output_path}")

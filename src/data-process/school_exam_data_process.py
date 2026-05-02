@@ -75,7 +75,7 @@ def batch_excel_data_process(
     keep_row: list[str],
     keep_column: list[str],
     header_row: int,
-    output_folder: str = None,
+    output_folder: str,
 ) -> None:
     """
     关于这个方法:  是用来批量整理学校发的excel (必须是.xlsx后缀) 表中的数据, 并进行清洗,

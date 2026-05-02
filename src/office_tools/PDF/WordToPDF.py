@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from docx2pdf import convert
 
