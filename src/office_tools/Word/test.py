@@ -6,7 +6,6 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
 
 
-# --- 代码是将 excel 中的数据批量导入 word 并整理好格式的代码 ---
 def set_global_font(doc, font_name):
     """设置文档全局中西文字体"""
     style = doc.styles["Normal"]
@@ -34,24 +33,39 @@ def save_as_pretty_word(df, output_path, title_text="复习题库"):
     records = df.to_dicts()
 
     for i, row in enumerate(records, 1):
-        # A. 题干 (加粗, 12pt)
+        # A. 题干（题目列）
+        # 注意：列名是"题目"，不是"题干"
+        question_text = row.get('题目', '')
+        if not question_text:
+            continue
+            
         p = doc.add_paragraph()
-        run = p.add_run(f"{i}. {row['题干']}")
+        run = p.add_run(f"{i}. {question_text}")
         run.bold = True
         run.font.size = Pt(12)
 
-        # B. 选项 (A,B,C,D)
+        # B. 选项（A,B,C,D）- 只显示非空的选项
         for opt in ["A", "B", "C", "D"]:
             col_name = f"选项{opt}"
-            # 检查列是否存在且不为空
-            if col_name in row and row[col_name]:
+            opt_value = row.get(col_name, '')
+            if opt_value and str(opt_value).strip():
                 opt_p = doc.add_paragraph(style="List Bullet")
-                opt_run = opt_p.add_run(f"{opt}. {row[col_name]}")
+                opt_run = opt_p.add_run(f"{opt}. {opt_value}")
                 opt_run.font.bold = True
 
-        # C. 正确答案 (深蓝色, 10pt)
+        # C. 正确答案
+        # 注意：答案列是"答案"，值为1表示正确，0表示错误
+        raw_answer = row.get('答案', '')
+        # 将数字答案转换为可读文本
+        if raw_answer == 1 or str(raw_answer).strip() == '1':
+            answer_text = "正确"
+        elif raw_answer == 0 or str(raw_answer).strip() == '0':
+            answer_text = "错误"
+        else:
+            answer_text = str(raw_answer) if raw_answer else ""
+
         ans_p = doc.add_paragraph()
-        ans_run = ans_p.add_run(f"【正确答案】：{row['正确答案']}")
+        ans_run = ans_p.add_run(f"【正确答案】：{answer_text}")
         ans_run.font.color.rgb = RGBColor(0, 102, 204)
         ans_run.font.size = Pt(10)
         ans_run.font.bold = True
@@ -60,9 +74,7 @@ def save_as_pretty_word(df, output_path, title_text="复习题库"):
         doc.add_paragraph("-" * 80)
 
     doc.save(output_path)
-
-
-# --- 批量处理逻辑 ---
+    print(f"✅ 已保存: {output_path}")
 
 
 def batch_process_folder(source_dir, output_dir):
@@ -89,7 +101,7 @@ def batch_process_folder(source_dir, output_dir):
             # 1. 读取 Excel
             df = pl.read_excel(file)
 
-            # 2. 确定输出路径和文档标题
+            # 2. 确定输出路径和文档标题（使用原文件名）
             file_stem = file.stem
             target_word = out_path / f"{file_stem}.docx"
 
@@ -101,4 +113,10 @@ def batch_process_folder(source_dir, output_dir):
             print(f"⚠️ 处理文件 {file.name} 时发生异常: {e}")
 
 
-
+# ========== 使用示例 ==========
+if __name__ == "__main__":
+    # 方式1：批量处理整个文件夹
+    batch_process_folder(
+        source_dir=r"C:\Users\asus\Desktop\学校作业\通信原理",  # 替换为你的Excel文件夹路径
+        output_dir=r"C:\Users\asus\Desktop\学校作业\通信原理\an_word"   # 替换为输出Word文件夹路径
+    )

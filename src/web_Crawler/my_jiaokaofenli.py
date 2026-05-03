@@ -30,8 +30,7 @@ session.headers.update(
     }
 )
 
-for i in range(1, 176): 
-    target_url = f"https://wisdom2.prod.shangyuninfo.com/prod-api/roomUserQuestion/info/question?cardOrder={i}"
-    response = session.get(url=target_url)
-    response.encoding = "utf-8"
+target_url = f"https://wisdom2.prod.shangyuninfo.com/prod-api/roomUserQuestion/info/question?cardOrder=95"
+response = session.get(url=target_url)
+response.encoding = "utf-8"
 print(response.text)

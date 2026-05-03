@@ -42,6 +42,7 @@ def fetch_question(card_order):
                 "选项C": clean_html(data.get("optionC", "")),
                 "选项D": clean_html(data.get("optionD", "")),
                 "答案": data.get("answer", ""),
+                "填空题答案": data.get("referenceAnswer", "")
             }
         else:
             print(f"序号 {card_order}: 无数据或接口返回错误 - {json_data.get('msg', '未知错误')}")
