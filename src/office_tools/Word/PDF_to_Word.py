@@ -26,7 +26,7 @@ for pdf_file in pdf_files:
     try:
         # 创建转换器并转换
         cv = Converter(pdf_path)
-        cv.convert(word_path, start=0, end=None)
+        cv.convert(word_path, start=0)
         cv.close()
 
         print(f"✓ 已转换: {pdf_file} -> {word_file}")
