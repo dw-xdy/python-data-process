@@ -1,5 +1,3 @@
-
-
 class RegexConstants:
     """
     常用正则表达式常量工具类

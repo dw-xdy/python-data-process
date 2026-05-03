@@ -17,27 +17,27 @@ soup = BeautifulSoup(html_doc, "lxml")
 # 【1】查找指定的标签对象
 # （1）查找 head 标签的类型
 # print(soup.head,type(soup.head)) # <class 'bs4.element.Tag'>
-'''
+"""
 <head>
 <title>The Dormouse's story</title>
 </head>
-'''
+"""
 
 # （2）获取到 title 标签
 # print(soup.title)
-'''
+"""
 <title>The Dormouse's story</title>
-'''
+"""
 # （3）获取到所有的a标签
 # print(soup.a)
-'''
+"""
 <a class="sister" href="http://example.com/outside" id="link_outside">p标签外面的a标签</a>
-'''
+"""
 # print(soup.p.a) # 第一个 p 标签下面的 a 标签 但是 第一个 p 标签下面没有 a 标签
 # print(soup.p.b) # 第一个 p 标签下面的 p 标签 有就被拿出来了
-'''
+"""
 <b>The Dormouse's story</b>
-'''
+"""
 
 # 【2】获取指定标签对象的属性
 """
@@ -55,15 +55,15 @@ print(soup.a["class"])  # ['sister']
 print(soup.a.attrs)  # {'href': 'http://example.com/outside', 'class': ['sister'], 'id': 'link_outside'}
 """
 # 【3】修改指定标签的属性值
-'''
+"""
 print(soup.a.attrs)
 # （1）将 href 属性替换掉 sister 和 brother
 soup.a["class"] = "sister brother"
 print(soup.a)
-'''
+"""
 # 【4】想要a标签中间的文本内容
 
-'''
+"""
 # （1）soup.a.string 针对与单个标签来说的
 print(soup.p.string)  # p标签外面的a标签
 # None
@@ -73,12 +73,12 @@ print(soup.p.strings)
 for i in soup.a.strings:
     print(i)  # p标签外面的a标签
     # Elsie
-'''
+"""
 
 # 【三】NavigableString对象
 print(type(soup.p.b.strings))
 # <class 'generator'>
-'''
+"""
 # 表示标签中间的文本内容
 # 获取p标签的文本内容
 print(soup.p.string)  # 只能获取到当前 p 标签的文本信息
@@ -92,9 +92,9 @@ for i in soup.p.strings:
     print(i)
     print("-----")
 # The Dormouse's story
-'''
+"""
 
 # 【四】Comment对象
 # 主要用于获取标签中间的注释内容的对象
-print(soup.b.string,type(soup.b.string))
+print(soup.b.string, type(soup.b.string))
 # <class 'bs4.element.Comment'>

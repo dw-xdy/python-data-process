@@ -38,7 +38,7 @@ def save_as_pretty_word(df, output_path, title_text="通信原理填空题题库
     stats_run = stats_p.add_run(f"共 {len(df)} 道填空题")
     stats_run.font.size = Pt(11)
     stats_run.font.color.rgb = RGBColor(100, 100, 100)
-    
+
     # 添加分隔线
     doc.add_paragraph("=" * 50)
 
@@ -46,12 +46,12 @@ def save_as_pretty_word(df, output_path, title_text="通信原理填空题题库
 
     for i, row in enumerate(records, 1):
         # 获取题目和答案
-        question_text = row.get('题目', '')
-        answer_text = row.get('填空题答案', '')
-        
+        question_text = row.get("题目", "")
+        answer_text = row.get("填空题答案", "")
+
         if not question_text:
             continue
-            
+
         # A. 题号 + 题干
         p = doc.add_paragraph()
         run = p.add_run(f"{i}. {question_text}")
@@ -67,7 +67,7 @@ def save_as_pretty_word(df, output_path, title_text="通信原理填空题题库
 
         # C. 添加一些间距
         doc.add_paragraph()
-        
+
         # D. 分割线（不是最后一道题才加）
         if i < len(records):
             doc.add_paragraph("-" * 80)
@@ -99,7 +99,7 @@ def batch_process_folder(source_dir, output_dir):
         try:
             # 1. 读取 Excel
             df = pl.read_excel(file)
-            
+
             # 检查必要的列是否存在
             required_cols = ["题目", "填空题答案"]
             missing_cols = [col for col in required_cols if col not in df.columns]
@@ -122,28 +122,28 @@ def batch_process_folder(source_dir, output_dir):
 def convert_single_file(excel_path, output_path=None, title=None):
     """
     转换单个Excel文件
-    
+
     参数:
         excel_path: Excel文件路径
         output_path: 输出Word路径（可选，默认同目录同名）
         title: 文档标题（可选，默认使用文件名）
     """
     excel_path = Path(excel_path)
-    
+
     if not excel_path.exists():
         print(f"❌ 错误: 文件 {excel_path} 不存在")
         return
-    
+
     # 读取Excel
     df = pl.read_excel(excel_path)
-    
+
     # 检查必要的列是否存在
     required_cols = ["题目", "填空题答案"]
     missing_cols = [col for col in required_cols if col not in df.columns]
     if missing_cols:
         print(f"❌ 错误: Excel缺少列: {missing_cols}")
         return
-    
+
     # 确定输出路径
     if output_path is None:
         output_dir = excel_path.parent / "word_output"
@@ -152,11 +152,11 @@ def convert_single_file(excel_path, output_path=None, title=None):
     else:
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     # 确定标题
     if title is None:
         title = excel_path.stem
-    
+
     # 转换
     save_as_pretty_word(df, output_path, title_text=title)
 
@@ -166,5 +166,5 @@ if __name__ == "__main__":
     # 方式1：批量处理整个文件夹
     batch_process_folder(
         source_dir=r"C:\Users\asus\Desktop\学校作业\通信原理",  # Excel文件夹路径
-        output_dir=r"C:\Users\asus\Desktop\学校作业\通信原理\word_output"   # 输出Word文件夹路径
+        output_dir=r"C:\Users\asus\Desktop\学校作业\通信原理\word_output",  # 输出Word文件夹路径
     )

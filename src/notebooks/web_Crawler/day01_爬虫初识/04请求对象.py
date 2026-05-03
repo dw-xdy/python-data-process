@@ -58,7 +58,6 @@ print(response.text)
 """
 
 
-
 # ● 常见的HTTP头部字段包括：
 #   ○ Host：指定目标服务器的域名或IP地址。
 #   ○ User-Agent：标识发送请求的用户代理（通常是浏览器）。
@@ -128,15 +127,11 @@ from fake_useragent import UserAgent
 
 # 这里需要注意的是: 这里的请求是发送到搜狗的, 所以对应的, 需要修改请求参数 将 wd 修改为: query
 # headers的作用和意义: 用来标识你是一个正常的浏览器发送的请求, 而不是一个python程序发送的请求
-headers = {
-    "User-Agent": UserAgent().random
-}
+headers = {"User-Agent": UserAgent().random}
 
-params = {
-    "query": "周杰伦"
-}
+params = {"query": "周杰伦"}
 
-target_url = 'https://www.sogou.com/web?'
+target_url = "https://www.sogou.com/web?"
 
 # 请求一定要带上 headers，并且params 的参数自带了 UTF-8 编码进行解析。
 response = requests.get(url=target_url, headers=headers, params=params)

@@ -10,16 +10,16 @@ def set_run_font(run, font_name):
 
     # 通过XML设置中文字体和其他语言字体
     rPr = run._element.get_or_add_rPr()
-    rFonts = OxmlElement('w:rFonts')
+    rFonts = OxmlElement("w:rFonts")
 
     # 设置各种语言的字体
-    rFonts.set(qn('w:ascii'), font_name)  # 英文字体
-    rFonts.set(qn('w:hAnsi'), font_name)  # ANSI字体
-    rFonts.set(qn('w:eastAsia'), font_name)  # 东亚字体（中文）
-    rFonts.set(qn('w:cs'), font_name)  # 复杂文种字体
+    rFonts.set(qn("w:ascii"), font_name)  # 英文字体
+    rFonts.set(qn("w:hAnsi"), font_name)  # ANSI字体
+    rFonts.set(qn("w:eastAsia"), font_name)  # 东亚字体（中文）
+    rFonts.set(qn("w:cs"), font_name)  # 复杂文种字体
 
     # 替换或添加rFonts元素
-    old_rFonts = rPr.find(qn('w:rFonts'))
+    old_rFonts = rPr.find(qn("w:rFonts"))
     if old_rFonts is not None:
         rPr.remove(old_rFonts)
     rPr.append(rFonts)
@@ -39,19 +39,19 @@ def convert_word_font(input_path, output_path, font_name="霞鹜文楷"):
     print("正在转换样式字体...")
     for style in doc.styles:
         try:
-            if hasattr(style, 'font'):
+            if hasattr(style, "font"):
                 style.font.name = font_name
 
                 # 通过XML设置样式字体
                 rPr = style._element.get_or_add_rPr()
-                rFonts = OxmlElement('w:rFonts')
-                rFonts.set(qn('w:ascii'), font_name)
-                rFonts.set(qn('w:hAnsi'), font_name)
-                rFonts.set(qn('w:eastAsia'), font_name)
-                rFonts.set(qn('w:cs'), font_name)
+                rFonts = OxmlElement("w:rFonts")
+                rFonts.set(qn("w:ascii"), font_name)
+                rFonts.set(qn("w:hAnsi"), font_name)
+                rFonts.set(qn("w:eastAsia"), font_name)
+                rFonts.set(qn("w:cs"), font_name)
 
                 # 替换或添加rFonts元素
-                old_rFonts = rPr.find(qn('w:rFonts'))
+                old_rFonts = rPr.find(qn("w:rFonts"))
                 if old_rFonts is not None:
                     rPr.remove(old_rFonts)
                 rPr.append(rFonts)
@@ -105,7 +105,7 @@ def convert_word_font(input_path, output_path, font_name="霞鹜文楷"):
 
     # 5. 转换脚注和尾注中的字体（如果存在）
     try:
-        if hasattr(doc, 'footnotes'):
+        if hasattr(doc, "footnotes"):
             for footnote in doc.footnotes:
                 for paragraph in footnote.paragraphs:
                     for run in paragraph.runs:
@@ -139,10 +139,10 @@ def quick_convert_word_font(input_path, output_path, font_name="霞鹜文楷"):
         style.font.name = font_name
         try:
             rPr = style._element.get_or_add_rPr()
-            rFonts = OxmlElement('w:rFonts')
-            rFonts.set(qn('w:eastAsia'), font_name)
-            rFonts.set(qn('w:ascii'), font_name)
-            old_rFonts = rPr.find(qn('w:rFonts'))
+            rFonts = OxmlElement("w:rFonts")
+            rFonts.set(qn("w:eastAsia"), font_name)
+            rFonts.set(qn("w:ascii"), font_name)
+            old_rFonts = rPr.find(qn("w:rFonts"))
             if old_rFonts is not None:
                 rPr.remove(old_rFonts)
             rPr.append(rFonts)
@@ -155,10 +155,10 @@ def quick_convert_word_font(input_path, output_path, font_name="霞鹜文楷"):
             try:
                 run.font.name = font_name
                 rPr = run._element.get_or_add_rPr()
-                rFonts = OxmlElement('w:rFonts')
-                rFonts.set(qn('w:eastAsia'), font_name)
-                rFonts.set(qn('w:ascii'), font_name)
-                old_rFonts = rPr.find(qn('w:rFonts'))
+                rFonts = OxmlElement("w:rFonts")
+                rFonts.set(qn("w:eastAsia"), font_name)
+                rFonts.set(qn("w:ascii"), font_name)
+                old_rFonts = rPr.find(qn("w:rFonts"))
                 if old_rFonts is not None:
                     rPr.remove(old_rFonts)
                 rPr.append(rFonts)
@@ -174,10 +174,10 @@ def quick_convert_word_font(input_path, output_path, font_name="霞鹜文楷"):
                         try:
                             run.font.name = font_name
                             rPr = run._element.get_or_add_rPr()
-                            rFonts = OxmlElement('w:rFonts')
-                            rFonts.set(qn('w:eastAsia'), font_name)
-                            rFonts.set(qn('w:ascii'), font_name)
-                            old_rFonts = rPr.find(qn('w:rFonts'))
+                            rFonts = OxmlElement("w:rFonts")
+                            rFonts.set(qn("w:eastAsia"), font_name)
+                            rFonts.set(qn("w:ascii"), font_name)
+                            old_rFonts = rPr.find(qn("w:rFonts"))
                             if old_rFonts is not None:
                                 rPr.remove(old_rFonts)
                             rPr.append(rFonts)
@@ -204,5 +204,5 @@ if __name__ == "__main__":
     quick_convert_word_font(
         input_path=r"F:\E\编程学习\01 编程语言学习\Rust\Rust 程序设计语言 简体中文版.docx",
         output_path=r"F:\E\编程学习\01 编程语言学习\Rust\Rust 程序设计语言_新字体.docx",
-        font_name="霞鹜文楷等宽 Medium"
+        font_name="霞鹜文楷等宽 Medium",
     )

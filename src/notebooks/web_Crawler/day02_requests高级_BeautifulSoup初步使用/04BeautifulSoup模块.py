@@ -17,7 +17,7 @@
 
 # 【三】基础使用之解析器
 # 帮助我们生成文档对象的解析方式，有的解析器比较强大，好用
-'''
+"""
 :param features: Desirable features of the parser to be
  used. This may be the name of a specific parser ("lxml",
  "lxml-xml", "html.parser", or "html5lib") or it may be the
@@ -26,7 +26,7 @@
  Beautiful Soup gives you the same results across platforms
  and virtual environments.
 
-'''
+"""
 # from bs4 import BeautifulSoup
 # soup = BeautifulSoup()
 # 【1】内置解析器  "html.parser"
@@ -76,4 +76,4 @@ soup = BeautifulSoup(open("01.html", "r").read(), "lxml")
 print(soup, type(soup))  # <class 'bs4.BeautifulSoup'>
 
 """
-# 【2】方式二：直接写一段代码片段或者从网页上读取下来后直接给 BeautifulSoup 
+# 【2】方式二：直接写一段代码片段或者从网页上读取下来后直接给 BeautifulSoup

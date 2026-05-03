@@ -15,7 +15,6 @@ response = requests.get(url=target_url, headers=headers)
 print(response.text)
 """
 
-
 """
 import requests
 from fake_useragent import UserAgent
@@ -99,7 +98,9 @@ def get_data():
     )  # 发起请求获取到的Cookie信息回自动存储到 session 对象中
 
     # 【二】定义目标网址
-    tag_url = "https://stock.xueqiu.com/v5/stock/chart/minute.json?symbol=SZ399001&period=1d"
+    tag_url = (
+        "https://stock.xueqiu.com/v5/stock/chart/minute.json?symbol=SZ399001&period=1d"
+    )
     # 【三】不用手动携带 cookie 即可获取指定的数据
     response = session.get(url=tag_url, headers=headers)
 

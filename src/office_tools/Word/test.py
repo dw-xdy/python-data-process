@@ -35,10 +35,10 @@ def save_as_pretty_word(df, output_path, title_text="复习题库"):
     for i, row in enumerate(records, 1):
         # A. 题干（题目列）
         # 注意：列名是"题目"，不是"题干"
-        question_text = row.get('题目', '')
+        question_text = row.get("题目", "")
         if not question_text:
             continue
-            
+
         p = doc.add_paragraph()
         run = p.add_run(f"{i}. {question_text}")
         run.bold = True
@@ -47,7 +47,7 @@ def save_as_pretty_word(df, output_path, title_text="复习题库"):
         # B. 选项（A,B,C,D）- 只显示非空的选项
         for opt in ["A", "B", "C", "D"]:
             col_name = f"选项{opt}"
-            opt_value = row.get(col_name, '')
+            opt_value = row.get(col_name, "")
             if opt_value and str(opt_value).strip():
                 opt_p = doc.add_paragraph(style="List Bullet")
                 opt_run = opt_p.add_run(f"{opt}. {opt_value}")
@@ -55,11 +55,11 @@ def save_as_pretty_word(df, output_path, title_text="复习题库"):
 
         # C. 正确答案
         # 注意：答案列是"答案"，值为1表示正确，0表示错误
-        raw_answer = row.get('答案', '')
+        raw_answer = row.get("答案", "")
         # 将数字答案转换为可读文本
-        if raw_answer == 1 or str(raw_answer).strip() == '1':
+        if raw_answer == 1 or str(raw_answer).strip() == "1":
             answer_text = "正确"
-        elif raw_answer == 0 or str(raw_answer).strip() == '0':
+        elif raw_answer == 0 or str(raw_answer).strip() == "0":
             answer_text = "错误"
         else:
             answer_text = str(raw_answer) if raw_answer else ""
@@ -118,5 +118,5 @@ if __name__ == "__main__":
     # 方式1：批量处理整个文件夹
     batch_process_folder(
         source_dir=r"C:\Users\asus\Desktop\学校作业\通信原理",  # 替换为你的Excel文件夹路径
-        output_dir=r"C:\Users\asus\Desktop\学校作业\通信原理\an_word"   # 替换为输出Word文件夹路径
+        output_dir=r"C:\Users\asus\Desktop\学校作业\通信原理\an_word",  # 替换为输出Word文件夹路径
     )

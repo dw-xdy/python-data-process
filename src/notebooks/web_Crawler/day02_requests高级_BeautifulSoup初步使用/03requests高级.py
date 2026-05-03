@@ -26,7 +26,7 @@
 
 # 【5】代理如何添加
 # （1）requests 对象携带代理
-'''
+"""
 # 第一步 导入requests模块
 import requests
 from fake_useragent import UserAgent
@@ -45,7 +45,8 @@ proxies = {
     "https": "https://127.0.0.1:8000/",
 }
 response = requests.get(tag_url, headers=headers,proxies=proxies)
-'''
+"""
+
 # （2）session 对象携带代理
 """
 # 第一步 导入requests模块
@@ -93,7 +94,7 @@ response = session.get(tag_url, headers=headers, proxies=proxies)
 # 这时候就需要指定一个参数 取消 ssl 认证
 
 # 【1】不携带证书就会报错
-'''
+"""
 import requests
 url = 'https://ssr2.scrape.center/'
 response = requests.get(url)
@@ -102,9 +103,9 @@ print(response.status_code)
 # HTTPSConnectionPool(host='ssr2.scrape.center', port=443): 
 # Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.VerifiedHTTPSConnection object at 0x13a9d52d0>: Failed to establish a new connection: 
 # [Errno 8] nodename nor servname provided, or not known'))
-'''
+"""
 # 【2】取消证书验证
-'''
+"""
 import requests
 url = 'https://ssr2.scrape.center/'
 response = requests.get(url=url, verify=False)
@@ -112,10 +113,10 @@ print(response.status_code)
 # InsecureRequestWarning: Unverified HTTPS request is being made. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warnings
 #   warnings.warn((
 # 200
-'''
+"""
 
 # 【3】加上证书验证
-'''
+"""
 import requests
 url = 'https://ssr2.scrape.center/'
 cert_file = "/path/to/my_certificate.pem"
@@ -128,7 +129,7 @@ print(response.status_code)
 
 # 打印响应内容
 print(response.text)
-'''
+"""
 
 # 【三】超时时间设置
 # 在某些情况下我们会访问指定网站超时 给她加一个超时时间
@@ -146,7 +147,7 @@ print(response.text)
 
 
 # 【1】连接超时
-'''
+"""
 import time
 import requests
 
@@ -167,9 +168,9 @@ except requests.exceptions.RequestException as e:
 
 # 打印结束时间
 print(time.strftime('%Y-%m-%d %H:%M:%S'))
-'''
+"""
 # 【2】超时重试
-'''
+"""
 # （1）方案一：自己写 while 循环
 # （2）方案二：借助 requests 对象中的重试对象
 import time
@@ -192,10 +193,10 @@ try:
 except requests.exceptions.RequestException as e:
     print(e)
 print(time.strftime('%Y-%m-%d %H:%M:%S'))
-'''
+"""
 
 # 【四】高级身份认证
-'''
+"""
 # 在某些网站我们需要进行身份的认证
 # 需要先登陆 登录后获取到认证信息才能继续使用网站
 from requests.auth import HTTPBasicAuth
@@ -218,10 +219,10 @@ print(response.text)
 # 输出响应的状态码。
 print(response.status_code)
 # <Response [200]>
-'''
+"""
 
 # 【2】简写语法
-'''
+"""
 import requests
 
 # 携带认证参数，使用该函数进行请求。
@@ -237,7 +238,7 @@ print(response.text)
 # 输出响应的状态码。
 print(response.status_code)
 # <Response [200]>
-'''
+"""
 
 # 【五】异常捕获
 # 在 requests 对象中内置了很多的异常信息
@@ -247,7 +248,7 @@ print(response.status_code)
 
 
 # 【六】文件上传
-'''
+"""
 import requests
 
 files = {'file': open('a.jpg', 'rb')}
@@ -256,4 +257,4 @@ print(response.status_code)
 
 
 # 我们在Django写 BBS 注册时候也带过头像文件
-'''
+"""

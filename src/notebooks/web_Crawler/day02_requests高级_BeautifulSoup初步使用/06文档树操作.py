@@ -22,7 +22,7 @@ from bs4 import BeautifulSoup
 
 soup = BeautifulSoup(open("html_doc.html", "r").read(), "lxml")
 # 【二】基础操作
-'''
+"""
 # 【1】获取当前标签的名字
 print(soup.a.name)
 # 【2】获取标签的属性值
@@ -36,37 +36,37 @@ print([i for i in soup.p.strings])  # ['\n', "The Dormouse's story", '\n']
 print(soup.a.text)  # Elsie
 # （4）获取当前标签下的所有标签内容 但是去除掉 空格或换行
 print([i for i in soup.p.stripped_strings])  # ["The Dormouse's story"]
-'''
+"""
 # 【三】嵌套选择
-'''
+"""
 # 可以在同一个对象上 . 后续取值
 print(soup.head.title.text) # The Dormouse's story
 print(soup.p.b.text) # The Dormouse's story
-'''
+"""
 
 # 【四】后代选择
 # 可以通过 .contents 和.children 属性来获取标签的子节点。
 # 【1】.contents 获取当前标签下的所有子节点和文本内容
 # print(soup.p.contents)
-'''
+"""
 ['\n    Once upon a time there were three little sisters; and their names were\n\n    ', <a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>, ',\n    ', <a class="sister" href="http://example.com/lacie" id="link2">Lacie</a>, ' and\n    ', <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>, ';\n    and they lived at the bottom of a well.\n']
-'''
+"""
 # 【2】.children  迭代器对象
 # print(soup.p.children)  # <list_iterator object at 0x12a509840>
 # print([i for i in soup.p.children])
-'''
+"""
 ['\n    Once upon a time there were three little sisters; and their names were\n\n    ', <a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>, ',\n    ', <a class="sister" href="http://example.com/lacie" id="link2">Lacie</a>, ' and\n    ', <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>, ';\n    and they lived at the bottom of a well.\n']
-'''
+"""
 # 【3】.descendants 获取到的事当期那标签下的所有内容和标签对象及标签对象中的文本内容
 # print(soup.p.descendants) # <generator object Tag.descendants at 0x11ba11c40>
 # print([i for i in soup.p.descendants])
-'''
+"""
 ['\n    Once upon a time there were three little sisters; and their names were\n\n    ', <a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>, 'Elsie', ',\n    ', <a class="sister" href="http://example.com/lacie" id="link2">Lacie</a>, 'Lacie', ' and\n    ', <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>, 'Tillie', ';\n    and they lived at the bottom of a well.\n']
-'''
+"""
 # 【4】.parent 和 .parents
 # （1）.parent 获取当前标签的父标签对象
 # print(soup.a.parent)
-'''
+"""
 <p class="story">
     Once upon a time there were three little sisters; and their names were
 
@@ -75,19 +75,19 @@ print(soup.p.b.text) # The Dormouse's story
     <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>;
     and they lived at the bottom of a well.
 </p>
-'''
+"""
 # （2）.parents 获取到当前标签对象的所有父标签对象
-'''
+"""
 print(soup.a.parents) # <generator object PageElement.parents at 0x11cc69c40>
 print([i for i in soup.a.parents])
-'''
+"""
 
 # 【5】.next_sibling 获取到当前标签的下一个兄弟对象
 print(soup.a.next_sibling)  # ,
 print(soup.a.next_sibling.next_sibling)
-'''
+"""
 <a class="sister" href="http://example.com/lacie" id="link2">Lacie</a>
-'''
+"""
 
 print(soup.a.previous_sibling.previous_sibling)  # 上一个兄弟
 
