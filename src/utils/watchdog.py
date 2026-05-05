@@ -38,6 +38,7 @@ def rename_files(folder_path):
     txt_files = glob.glob(pattern, recursive=True)
 
     renamed_count = 0
+    renamed_files = []  # 记录重命名的文件
 
     for file_path in txt_files:
         directory = os.path.dirname(file_path)
@@ -48,6 +49,7 @@ def rename_files(folder_path):
             .replace("soushu2025.com@", "")
             .replace("搜书吧", "")
             .replace("sxsy_org", "")
+            .replace("[]", "")
         )
 
         if new_filename != filename:
@@ -64,12 +66,13 @@ def rename_files(folder_path):
                 os.rename(file_path, new_file_path)
                 print(f"重命名: {filename} -> {os.path.basename(new_file_path)}")
                 renamed_count += 1
+                renamed_files.append((filename, os.path.basename(new_file_path)))
             except Exception as e:
                 print(f"重命名失败 {filename}: {e}")
 
     elapsed = time.perf_counter() - start_time
     print(f"⏱️  重命名文件耗时: {elapsed:.4f} 秒")
-    return renamed_count
+    return renamed_count, renamed_files
 
 
 def process_folder(folder_path):
@@ -78,7 +81,9 @@ def process_folder(folder_path):
 
     # 1. 先重命名文件
     print("第一步：重命名文件...")
-    renamed_count = rename_files(folder_path)
+    renamed_count, renamed_files = rename_files(folder_path)
+    if renamed_count == 0:
+        print("没有文件需要重命名")
     print(f"完成重命名，共处理 {renamed_count} 个文件\n")
 
     # 2. 再处理文件内容
@@ -94,20 +99,35 @@ def process_folder(folder_path):
 
     print(f"找到 {len(txt_files)} 个 .txt 文件")
     processed_count = 0
+    modified_files = []  # 记录修改了内容的文件
 
     for file_path in txt_files:
         if replace_quotes_in_file(file_path):
-            print(f"已处理内容: {file_path}")
+            print(f"修改内容: {file_path}")
             processed_count += 1
-        else:
-            print(f"无变化: {file_path}")
+            modified_files.append(file_path)
 
     content_elapsed = time.perf_counter() - content_start
     print(f"⏱️  处理文件内容耗时: {content_elapsed:.4f} 秒")
 
     total_elapsed = time.perf_counter() - total_start
 
-    print("\n📊 ========== 性能统计 ==========")
+    print("\n📊 ========== 修改汇总 ==========")
+    if renamed_files:
+        print("\n重命名的文件:")
+        for old_name, new_name in renamed_files:
+            print(f"  {old_name} -> {new_name}")
+    else:
+        print("\n重命名的文件: 无")
+    
+    if modified_files:
+        print(f"\n修改了内容的文件:")
+        for file_path in modified_files:
+            print(f"  {file_path}")
+    else:
+        print(f"\n修改了内容的文件: 无")
+    
+    print(f"\n📈 ========== 统计信息 ==========")
     print(f"- 重命名文件: {renamed_count} 个")
     print(f"- 修改内容: {processed_count} 个文件")
     print(f"- 总耗时: {total_elapsed:.4f} 秒")
