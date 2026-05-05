@@ -63,7 +63,7 @@ def fetch_question(card_order):
 
 
 # ========== 3. 批量爬取题目 ==========
-def crawl_questions(start=1, end=176, delay=0.5):
+def crawl_questions(start=1, end=175, delay=0.5):
     """
     批量爬取题目
 
@@ -130,7 +130,7 @@ def save_to_json(data, filepath):
 def main():
     # 配置参数
     START = 1  # 起始序号
-    END = 2  # 结束序号（先测试10题，确认没问题再改回176）
+    END = 2  # 结束序号（先测试10题，确认没问题再改回175）
     DELAY = 0.5  # 请求间隔（秒）
 
     # 输出文件路径
