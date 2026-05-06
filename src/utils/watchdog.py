@@ -3,6 +3,15 @@ import glob
 import re
 import time
 
+# 在函数外部编译正则表达式（模块级别，只编译一次）
+# 1. 删除特定文本的模式
+DELETE_PATTERN = re.compile(
+    r"-----------------------------------\n本文件来自尚香书[苑院]。\n发布页：sxsy\.org\n-----------------------------------\n?"
+)
+
+# 2. 替换双引号为直角引号的模式
+QUOTE_PATTERN = re.compile(r'[“"＂](.*?)[”"＂]')
+
 
 def replace_quotes_in_file(file_path):
     """替换单个文件中的不同的双引号为直角引号，并删除特定文本"""
@@ -12,12 +21,11 @@ def replace_quotes_in_file(file_path):
 
         original_content = content
 
-        # 1. 删除特定文本，只是将文中的设置删除。
-        pattern = r"-----------------------------------\n本文件来自尚香书[苑院]。\n发布页：sxsy\.org\n-----------------------------------\n?"
-        content = re.sub(pattern, "", content)
+        # 1. 删除特定文本
+        content = DELETE_PATTERN.sub("", content)
 
-        # 2. 使用正则表达式替换双引号为直角引号
-        content = re.sub(r'[“"＂](.*?)[”"＂]', r"「\1」", content)
+        # 2. 替换双引号为直角引号
+        content = QUOTE_PATTERN.sub(r"「\1」", content)
 
         # 如果内容有变化，则写回文件
         if content != original_content:
@@ -119,15 +127,15 @@ def process_folder(folder_path):
             print(f"  {old_name} -> {new_name}")
     else:
         print("\n重命名的文件: 无")
-    
+
     if modified_files:
-        print(f"\n修改了内容的文件:")
+        print("\n修改了内容的文件:")
         for file_path in modified_files:
             print(f"  {file_path}")
     else:
-        print(f"\n修改了内容的文件: 无")
-    
-    print(f"\n📈 ========== 统计信息 ==========")
+        print("\n修改了内容的文件: 无")
+
+    print("\n📈 ========== 统计信息 ==========")
     print(f"- 重命名文件: {renamed_count} 个")
     print(f"- 修改内容: {processed_count} 个文件")
     print(f"- 总耗时: {total_elapsed:.4f} 秒")
