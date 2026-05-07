@@ -195,8 +195,6 @@ def save_as_pretty_word(df, output_path, title_text="复习题库"):
 
 
 # --- 批量处理逻辑 ---
-
-
 def batch_process_folder(source_dir, output_dir):
     """
     遍历 source_dir 下所有 Excel，转换并保存到 output_dir
@@ -236,19 +234,16 @@ def batch_process_folder(source_dir, output_dir):
 # 将一个文件夹中的 Excel 批量转为 PDF .
 # 这个批量处理的方法已经完全足够了, 并不需要和上面一样进行套壳.
 # docx2pdf 的 convert 已经可以处理的非常好了.
-def convert_word_to_pdf(source_dir, output_dir):
-    src_path = Path(source_dir)
-    out_path = Path(output_dir)
-
+def convert_word_to_pdf(source_dir: Path, output_dir: Path):
     # 确保输出目录存在
-    out_path.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"🚀 开始批量转换任务: {source_dir} -> {output_dir}")
 
     try:
         # docx2pdf 的强大之处：可以直接传入两个目录
         # 它会自动匹配源目录下的所有 docx 并生成到目标目录
-        convert(str(src_path), str(out_path))
+        convert(source_dir, output_dir)
         print(f"\n✨ 批量处理完成！PDF 已存入: {output_dir}")
     except Exception as e:
         print(f"⚠️ 批量转换过程中出现问题: {e}")
@@ -344,7 +339,9 @@ def process_word_to_pdf():
 
     print("\n正在处理...")
     try:
-        convert_word_to_pdf(source_dir=str(input_folder), output_dir=str(output_folder))
+        convert_word_to_pdf(
+            source_dir=Path(input_folder), output_dir=Path(output_folder)
+        )
     except Exception as e:
         print(f"❌ 处理过程中出现错误: {e}")
 
@@ -403,7 +400,7 @@ def process_full_workflow():
     pdf_folder = input_folder / "pdf_output"
     print("\n第三步：Word转PDF")
     try:
-        convert_word_to_pdf(source_dir=str(word_folder), output_dir=str(pdf_folder))
+        convert_word_to_pdf(source_dir=Path(word_folder), output_dir=Path(pdf_folder))
         print(f"✅ PDF文档已保存到: {pdf_folder}")
     except Exception as e:
         print(f"❌ Word转PDF失败: {e}")
