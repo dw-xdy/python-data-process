@@ -65,7 +65,6 @@ def rename_files(folder_path: Path):
 
             try:
                 txt_file.rename(new_file_path)
-                print(f"重命名: {txt_file_name} -> {new_file_path.name}")
                 renamed_count += 1
                 renamed_files.append(
                     (txt_file_name, new_file_path.name)
@@ -93,7 +92,7 @@ def process_folder(folder_path_str: str):
     renamed_count, renamed_files = rename_files(folder_path)
     if renamed_count == 0:
         print("没有文件需要重命名")
-    print(f"完成重命名，共处理 {renamed_count} 个文件\n")
+    print()
 
     # 2. 再处理文件内容
     print("第二步：处理文件内容...")
@@ -111,7 +110,6 @@ def process_folder(folder_path_str: str):
 
     for file_path in txt_files:
         if replace_quotes_in_file(file_path):
-            print(f"修改内容: {file_path}")
             processed_count += 1
             modified_files.append(file_path)
 
