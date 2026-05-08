@@ -1,8 +1,6 @@
-import os
 from pathlib import Path
 import fitz  # PyMuPDF
 from PIL import Image
-import glob
 import sys
 
 """
@@ -51,7 +49,7 @@ def pdf_to_images(pdf_path, output_folder, dpi=200):
 
                 # 构建输出文件名
                 output_filename = f"{pdf_name}_page_{page_num + 1:03d}.png"
-                output_path = os.path.join(output_folder, output_filename)
+                output_path = output_folder / output_filename
 
                 # 保存图像
                 img.save(output_path, "PNG", dpi=(dpi, dpi))
@@ -100,13 +98,13 @@ def batch_pdf_to_png(input_folder, output_folder=None, dpi=200):
     """
     # 设置输出文件夹
     if output_folder is None:
-        output_folder = os.path.join(input_folder, "png_output")
+        output_folder = input_folder / "png_output"
 
     # 创建输出文件夹（如果不存在）
-    os.makedirs(output_folder, exist_ok=True)
+    output_folder.mkdir(exist_ok=True)
 
     # 查找所有PDF文件
-    pdf_files = glob.glob(os.path.join(input_folder, "*.pdf"))
+    pdf_files = list(input_folder.glob("*.pdf"))
 
     if not pdf_files:
         print(f"在文件夹 '{input_folder}' 中没有找到PDF文件")
@@ -124,7 +122,7 @@ def batch_pdf_to_png(input_folder, output_folder=None, dpi=200):
 
     # 处理每个PDF文件
     for pdf_file in pdf_files:
-        print(f"\n正在处理: {os.path.basename(pdf_file)}")
+        print(f"\n正在处理: {pdf_file.name}")
         success, total = pdf_to_images(pdf_file, output_folder, dpi)
 
         total_success_pages += success
@@ -140,7 +138,7 @@ def batch_pdf_to_png(input_folder, output_folder=None, dpi=200):
     print(f"图片保存在: {output_folder}")
 
     # 显示输出文件夹内容
-    png_files = glob.glob(os.path.join(output_folder, "*.png"))
+    png_files = list(output_folder.glob("*.png"))
     if png_files:
         print(f"生成PNG文件数量: {len(png_files)} 个")
     else:
@@ -154,16 +152,16 @@ def main():
     print("=" * 50)
 
     # 获取输入文件夹
-    input_folder = input("请输入包含PDF文件的文件夹路径: ").strip()
+    input_folder = Path(input("请输入包含PDF文件的文件夹路径: ").strip())
 
     # 检查文件夹是否存在
-    if not os.path.exists(input_folder):
+    if not input_folder.exists():
         print("错误：指定的文件夹不存在！")
         sys.exit(1)
 
     # 获取输出文件夹
     output_folder_input = input("请输入输出文件夹路径（直接回车使用默认）: ").strip()
-    output_folder = output_folder_input if output_folder_input else None
+    output_folder = Path(output_folder_input) if output_folder_input else None
 
     # 获取DPI设置
     dpi_input = input("请输入图片分辨率DPI（默认200，直接回车使用默认）: ").strip()
