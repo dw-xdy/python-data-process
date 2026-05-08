@@ -147,7 +147,6 @@ if __name__ == "__main__":
     folder_path = folder_path.strip('"').strip("'")
 
     if Path(folder_path).is_dir():
-        print("注意：此操作会直接修改原文件和文件名，建议先备份！")
         print("开始执行...\n")
         program_start = time.perf_counter()
         process_folder(folder_path)
