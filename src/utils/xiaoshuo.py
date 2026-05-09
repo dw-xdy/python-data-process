@@ -1,6 +1,7 @@
 from pathlib import Path
 import re
 import time
+from typing import Tuple, Optional
 
 # 在函数外部编译正则表达式（模块级别，只编译一次）
 # 1. 删除特定文本的模式
@@ -11,8 +12,70 @@ DELETE_PATTERN = re.compile(
 # 2. 替换双引号为直角引号的模式
 QUOTE_PATTERN = re.compile(r'[“"＂](.*?)[”"＂]')
 
+# 处理完成的标记
+FINISHED_MARKER = "_finished"
 
-def replace_quotes_in_file(file_path: Path):
+
+def has_finished_marker(filename: str) -> bool:
+    """检查文件名是否已包含完成标记"""
+    stem = Path(filename).stem
+    return stem.endswith(FINISHED_MARKER)
+
+
+def remove_finished_marker(filename: str) -> str:
+    """从文件名中移除完成标记（用于显示原始文件名）"""
+    stem = Path(filename).stem
+    suffix = Path(filename).suffix
+
+    if stem.endswith(FINISHED_MARKER):
+        stem = stem[: -len(FINISHED_MARKER)]
+    return f"{stem}{suffix}"
+
+
+def clean_filename(filename: str) -> Tuple[str, bool]:
+    """清理文件名中的广告标记，返回清理后的文件名和是否有变化"""
+    original = filename
+    cleaned = (
+        filename.replace("[sxsy.org]", "")
+        .replace("soushu2025.com@", "")
+        .replace("搜书吧", "")
+        .replace("sxsy_org", "")
+        .replace("[]", "")
+        .strip()
+    )
+
+    # 清理可能产生的多余空格或符号
+    cleaned = re.sub(r"[_\s]+$", "", cleaned)  # 删除末尾的下划线和空格
+
+    return cleaned, cleaned != original
+
+
+def add_finished_marker(file_path: Path) -> Optional[Path]:
+    """为文件添加完成标记，返回新的文件路径，如果已存在则返回 None"""
+    if has_finished_marker(file_path.name):
+        return file_path  # 已经有标记了
+
+    stem = file_path.stem
+    suffix = file_path.suffix
+    new_name = f"{stem}{FINISHED_MARKER}{suffix}"
+    new_path = file_path.parent / new_name
+
+    # 如果目标文件已存在，添加数字后缀
+    counter = 1
+    while new_path.exists():
+        new_name = f"{stem}{FINISHED_MARKER}_{counter}{suffix}"
+        new_path = file_path.parent / new_name
+        counter += 1
+
+    try:
+        file_path.rename(new_path)
+        return new_path
+    except Exception as e:
+        print(f"添加完成标记失败 {file_path.name}: {e}")
+        return None
+
+
+def replace_quotes_in_file(file_path: Path) -> bool:
     """替换单个文件中的不同的双引号为直角引号，并删除特定文本"""
     try:
         content = file_path.read_text(encoding="utf-8")
@@ -21,7 +84,7 @@ def replace_quotes_in_file(file_path: Path):
         # 使用预编译的正则表达式进行替换
         content = DELETE_PATTERN.sub("", content)
         content = QUOTE_PATTERN.sub(r"「\1」", content)
-        content.replace("♥", "❤️").replace("♡", "❤️").replace("❤", "❤️")
+        content = content.replace("♥", "❤️").replace("♡", "❤️").replace("❤", "❤️")
 
         # 若是内容有变化，则将其写回文件。
         if content != origin_content:
@@ -33,53 +96,68 @@ def replace_quotes_in_file(file_path: Path):
         return False
 
 
-def rename_files(folder_path: Path):
-    """重命名文件，删除文件名中的 [sxsy.org]等字符，只保留文件名字"""
-    start_time = time.perf_counter()
+def process_single_file(
+    file_path: Path, add_marker: bool = True
+) -> Tuple[bool, bool, Optional[Path]]:
+    """
+    处理单个文件
+    返回: (内容是否修改, 是否重命名, 最终文件路径)
+    """
+    # 如果已经有完成标记，跳过处理
+    if has_finished_marker(file_path.name):
+        print(f"  ⏭️  跳过已处理的文件: {file_path.name}")
+        return False, False, file_path
 
-    txt_files = list(folder_path.rglob("*.txt"))  # 这里使用了rglob() 就是递归的。
+    # 1. 先清理文件名（移除广告标记）
+    old_name = file_path.name
+    cleaned_name, name_changed = clean_filename(old_name)
 
-    renamed_count = 0
-    renamed_files = []
+    if name_changed:
+        new_path = file_path.parent / cleaned_name
+        # 处理文件名冲突
+        counter = 1
+        original_new_path = new_path
+        while new_path.exists():
+            stem = original_new_path.stem
+            suffix = original_new_path.suffix
+            new_path = original_new_path.parent / f"{stem}_{counter}{suffix}"
+            counter += 1
 
-    for txt_file in txt_files:
-        txt_file_name = txt_file.name
-        new_txt_file_name = (
-            txt_file_name.replace("[sxsy.org]", "")
-            .replace("soushu2025.com@", "")
-            .replace("搜书吧", "")
-            .replace("sxsy_org", "")
-            .replace("[]", "")
-        )
+        try:
+            file_path.rename(new_path)
+            file_path = new_path
+            print(f"  📝 重命名: {old_name} -> {file_path.name}")
+        except Exception as e:
+            print(f"  ❌ 重命名失败 {old_name}: {e}")
+            return False, False, file_path
 
-        if new_txt_file_name != txt_file_name:
-            new_file_path = txt_file.parent / new_txt_file_name
+    # 2. 处理文件内容
+    content_modified = replace_quotes_in_file(file_path)
+    if content_modified:
+        print(f"  ✏️  修改内容: {file_path.name}")
 
-            # 文件名冲突处理
-            counter = 1
-            original_new_path = new_file_path
-            while new_file_path.exists():
-                stem = original_new_path.stem
-                suffix = original_new_path.suffix
-                new_file_path = original_new_path.parent / f"{stem}_{counter}{suffix}"
-                counter += 1
+    # 3. 添加完成标记
+    final_path = file_path
+    if add_marker and not has_finished_marker(file_path.name):
+        marked_path = add_finished_marker(file_path)
+        if marked_path:
+            final_path = marked_path
+            print(f"  ✅ 添加完成标记: {file_path.name} -> {final_path.name}")
 
-            try:
-                txt_file.rename(new_file_path)
-                renamed_count += 1
-                renamed_files.append(
-                    (txt_file_name, new_file_path.name)
-                )  # 使用实际的文件名，而不是: new_txt_file_name 这是为了防止文件名字冲突。
-            except Exception as e:
-                print(f"重命名失败 {txt_file_name}: {e}")
-
-    elapsed = time.perf_counter() - start_time
-    print(f"⏱️  重命名文件耗时: {elapsed:.4f} 秒")
-    return renamed_count, renamed_files
+    return content_modified, name_changed, final_path
 
 
-def process_folder(folder_path_str: str):
-    """处理文件夹下所有 .txt 文件"""
+def process_folder(
+    folder_path_str: str, add_marker: bool = True, skip_processed: bool = True
+):
+    """
+    处理文件夹下所有 .txt 文件
+
+    Args:
+        folder_path_str: 文件夹路径
+        add_marker: 是否添加完成标记
+        skip_processed: 是否跳过已标记的文件
+    """
     folder_path = Path(folder_path_str).resolve()
 
     if not folder_path.is_dir():
@@ -88,69 +166,141 @@ def process_folder(folder_path_str: str):
 
     total_start = time.perf_counter()
 
-    # 1. 先重命名文件
-    print("第一步：重命名文件...")
-    renamed_count, renamed_files = rename_files(folder_path)
-    if renamed_count == 0:
-        print("没有文件需要重命名")
-    print()
+    # 获取所有 txt 文件
+    all_txt_files = list(folder_path.rglob("*.txt"))
 
-    # 2. 再处理文件内容
-    print("第二步：处理文件内容...")
-    content_start = time.perf_counter()
-
-    txt_files = list(folder_path.rglob("*.txt"))
+    # 过滤文件
+    if skip_processed:
+        txt_files = [f for f in all_txt_files if not has_finished_marker(f.name)]
+        skipped_count = len(all_txt_files) - len(txt_files)
+    else:
+        txt_files = all_txt_files
+        skipped_count = 0
 
     if not txt_files:
-        print(f"在 {folder_path} 中没有找到 .txt 文件")
+        if skipped_count > 0:
+            print(f"📁 所有 {skipped_count} 个文件都已处理完成，无需重复处理")
+        else:
+            print(f"在 {folder_path} 中没有找到 .txt 文件")
         return
 
-    print(f"找到 {len(txt_files)} 个 .txt 文件")
-    processed_count = 0
-    modified_files = []  # 记录修改了内容的文件
+    print(f"📁 找到 {len(txt_files)} 个待处理的 .txt 文件")
+    if skipped_count > 0:
+        print(f"⏭️  跳过 {skipped_count} 个已处理的文件")
+    print()
 
-    for file_path in txt_files:
-        if replace_quotes_in_file(file_path):
-            processed_count += 1
-            modified_files.append(file_path)
+    # 处理文件
+    modified_content_count = 0
+    renamed_count = 0
+    processed_files = []
+    failed_files = []
 
-    content_elapsed = time.perf_counter() - content_start
-    print(f"⏱️  处理文件内容耗时: {content_elapsed:.4f} 秒")
+    for i, file_path in enumerate(txt_files, 1):
+        print(f"[{i}/{len(txt_files)}] 处理: {file_path.name}")
+        content_modified, name_changed, final_path = process_single_file(
+            file_path, add_marker
+        )
+
+        if content_modified:
+            modified_content_count += 1
+        if name_changed:
+            renamed_count += 1
+
+        if final_path:
+            processed_files.append((file_path, final_path))
+        else:
+            failed_files.append(file_path)
+
+        print()  # 添加空行分隔
 
     total_elapsed = time.perf_counter() - total_start
 
-    print("\n📊 ========== 修改汇总 ==========")
-    if renamed_files:
-        print("\n重命名的文件:")
-        for old_name, new_name in renamed_files:
-            print(f"  {old_name} -> {new_name}")
-    else:
-        print("\n重命名的文件: 无")
+    # 输出统计信息
+    print("\n" + "=" * 50)
+    print("📊 处理完成统计")
+    print("=" * 50)
+    print(f"✅ 成功处理: {len(processed_files)} 个文件")
+    if failed_files:
+        print(f"❌ 处理失败: {len(failed_files)} 个文件")
+        for f in failed_files:
+            print(f"   - {f.name}")
 
-    if modified_files:
-        print("\n修改了内容的文件:")
-        for file_path in modified_files:
-            print(f"  {file_path}")
-    else:
-        print("\n修改了内容的文件: 无")
+    print("\n📈 详细统计:")
+    print(f"   - 重命名文件: {renamed_count} 个")
+    print(f"   - 修改内容: {modified_content_count} 个文件")
+    print(f"   - 添加完成标记: {len(processed_files)} 个文件" if add_marker else "")
+    print(f"   - 总耗时: {total_elapsed:.4f} 秒")
+    print("=" * 50 + "\n")
 
-    print("\n📈 ========== 统计信息 ==========")
-    print(f"- 重命名文件: {renamed_count} 个")
-    print(f"- 修改内容: {processed_count} 个文件")
-    print(f"- 总耗时: {total_elapsed:.4f} 秒")
-    print("================================\n")
+    return processed_files, failed_files
+
+
+def remove_finished_markers(folder_path_str: str, dry_run: bool = True):
+    """
+    移除所有文件的 _finished 标记（用于重新处理）
+
+    Args:
+        folder_path_str: 文件夹路径
+        dry_run: 是否仅预览（不实际执行）
+    """
+    folder_path = Path(folder_path_str).resolve()
+
+    if not folder_path.is_dir():
+        print(f"错误：'{folder_path}' 不是一个有效的文件夹路径")
+        return
+
+    finished_files = [
+        f for f in folder_path.rglob("*.txt") if has_finished_marker(f.name)
+    ]
+
+    if not finished_files:
+        print("没有找到带有 _finished 标记的文件")
+        return
+
+    print(f"找到 {len(finished_files)} 个带有标记的文件")
+
+    if dry_run:
+        print("\n📋 预览（不会实际执行）:")
+        for f in finished_files:
+            new_name = remove_finished_marker(f.name)
+            print(f"  {f.name} -> {new_name}")
+        print("\n💡 若要实际执行，请设置 dry_run=False")
+        return
+
+    # 实际执行
+    for file_path in finished_files:
+        new_name = remove_finished_marker(file_path.name)
+        new_path = file_path.parent / new_name
+
+        # 处理文件名冲突
+        counter = 1
+        original_new_path = new_path
+        while new_path.exists():
+            stem = original_new_path.stem
+            suffix = original_new_path.suffix
+            new_path = original_new_path.parent / f"{stem}_{counter}{suffix}"
+            counter += 1
+
+        try:
+            file_path.rename(new_path)
+            print(f"  ✅ 移除标记: {file_path.name} -> {new_path.name}")
+        except Exception as e:
+            print(f"  ❌ 失败 {file_path.name}: {e}")
 
 
 if __name__ == "__main__":
     folder_path = r"F:\备份\3_文档文件\小说"
-
     folder_path = folder_path.strip('"').strip("'")
 
     if Path(folder_path).is_dir():
         print("开始执行...\n")
-        program_start = time.perf_counter()
-        process_folder(folder_path)
-        program_elapsed = time.perf_counter() - program_start
-        print(f"⏱️  程序总运行时间: {program_elapsed:.4f} 秒")
+
+        # 处理文件（默认添加 _finished 标记）
+        process_folder(folder_path, add_marker=True, skip_processed=True)
+
+        # 如果需要重新处理所有文件（包括已有标记的），可以这样做：
+        # 1. 先移除标记: remove_finished_markers(folder_path, dry_run=False)
+        # 2. 再重新处理: process_folder(folder_path, add_marker=True, skip_processed=False)
+
     else:
         print(f"错误：'{folder_path}' 不是一个有效的文件夹路径")
