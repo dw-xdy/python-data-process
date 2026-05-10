@@ -9,8 +9,8 @@ DELETE_PATTERN = re.compile(
     r"-----------------------------------\n+本文件来自尚香书[苑院]。\n+发布页：sxsy\.org\n+-----------------------------------\n?"
 )
 
-# 2. 替换双引号为直角引号的模式
-QUOTE_PATTERN = re.compile(r'[“"＂](.*?)[”"＂]')
+# 2. 替换引号为直角引号的模式
+QUOTE_PATTERN = re.compile(r'[“"＂‘](.*?)[”"＂’]')
 
 # 处理完成的标记
 FINISHED_MARKER = "_finished"
