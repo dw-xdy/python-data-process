@@ -1,6 +1,5 @@
-import os
+from pathlib import Path
 import shutil
-
 
 """
 这个代码的意义在于: 需要将一个文件夹中的很多个零散的文件复制到另一个文件夹中.
@@ -12,12 +11,12 @@ def copy_specified_files():
     file_list = []
 
     # 定义路径  这里'r' 表示: 按照字符串原始的方式处理. (而不是转义字符).
-    source_dir = r"C:\Users\asus\Desktop\学校作业\water"
-    target_dir = r"C:\Users\asus\Desktop\学校作业\kaishi"
+    source_dir = Path(r"C:\Users\asus\Desktop\学校作业\water")
+    target_dir = Path(r"C:\Users\asus\Desktop\学校作业\kaishi")
 
     # 确保目标目录存在
-    if not os.path.exists(target_dir):
-        os.makedirs(target_dir)
+    if not target_dir.exists():
+        target_dir.mkdir()
         print(f"创建目标目录: {target_dir}")
 
     # 复制文件
@@ -25,10 +24,10 @@ def copy_specified_files():
     missing_files = []
 
     for filename in file_list:
-        source_path = os.path.join(source_dir, filename)
-        target_path = os.path.join(target_dir, filename)
+        source_path = source_dir / filename
+        target_path = target_dir / filename
 
-        if os.path.exists(source_path):
+        if source_path.exists():
             try:
                 shutil.copy2(source_path, target_path)
                 print(f"已复制: {filename}")
