@@ -84,7 +84,7 @@ def replace_quotes_in_file(file_path: Path) -> bool:
         # 使用预编译的正则表达式进行替换
         content = DELETE_PATTERN.sub("", content)
         content = QUOTE_PATTERN.sub(r"「\1」", content)
-        content = content.replace("♥", "❤️").replace("♡", "❤️").replace("❤", "❤️")
+        content = content.replace("♥", "❤️").replace("♡", "❤️")
 
         # 若是内容有变化，则将其写回文件。
         if content != origin_content:
