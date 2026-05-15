@@ -23,8 +23,7 @@ def batch_convert_folder_to_pdf(source_dir: Path, output_dir: Path):
 # --- 执行示例 ---
 if __name__ == "__main__":
     # 设置你的 Word 所在的文件夹
-    WORD_INPUT = r"C:\Users\asus\Desktop\学校作业\通信原理"
-    # 设置你希望存放 PDF 的文件夹
-    PDF_OUTPUT = r"C:\Users\asus\Desktop\学校作业\通信原理"
+    WORD_INPUT = r"C:\Users\asus\Desktop\学校作业\高频\423109070829冯肖伟实验四.docx"
+    PDF_OUTPUT = r"C:\Users\asus\Desktop\学校作业\高频"
 
     batch_convert_folder_to_pdf(Path(WORD_INPUT), Path(PDF_OUTPUT))
