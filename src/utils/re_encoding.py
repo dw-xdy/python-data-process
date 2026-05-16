@@ -136,14 +136,14 @@ def convert_folder_to_utf8(folder_path: Path) -> tuple:
 
     # 显示干净的统计信息
     print(f"\n{'=' * 50}")
-    print(f"📊 转换完成")
+    print("📊 转换完成")
     print(f"  ✅ 转换: {converted_count} 个文件")
     print(f"  ⏭️  跳过: {skipped_count} 个文件 (已是 UTF-8)")
     if failed_count > 0:
         print(f"  ❌ 失败: {failed_count} 个文件")
 
     if encoding_stats:
-        print(f"\n📈 原编码统计:")
+        print("\n📈 原编码统计:")
         for encoding, count in sorted(
             encoding_stats.items(), key=lambda x: x[1], reverse=True
         ):
