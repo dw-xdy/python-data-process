@@ -6,7 +6,7 @@ def batch_convert_pdfs_to_word(source_dir: Path, output_dir: Path):
     """批量将文件夹中的所有 PDF 转换为 Word"""
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    pdf_files = list(source_dir.glob("*.pdf"))
+    pdf_files = list(source_dir.glob("*.pdf")) + list(source_dir.glob("*.PDF"))
     print(f"找到 {len(pdf_files)} 个 PDF 文件")
 
     for pdf_path in pdf_files:
