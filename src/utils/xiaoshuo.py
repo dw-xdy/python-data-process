@@ -10,7 +10,13 @@ DELETE_PATTERN = re.compile(
 )
 
 # 2. 替换引号为直角引号的模式
-QUOTE_PATTERN = re.compile(r'[“"＂‘](.*?)[”"＂’]')
+QUOTE_PATTERNS = [
+    (re.compile(r'"(.*?)"'), r"「\1」"),  # 双引号
+    (re.compile(r"'(.*?)'"), r"「\1」"),  # 单引号
+    (re.compile(r"“(.*?)”"), r"「\1」"),  # 中文左双引号 右双引号
+    (re.compile(r"‘(.*?)’"), r"「\1」"),  # 中文左单引号 右单引号
+    (re.compile(r"＂(.*?)＂"), r"「\1」"),  # 全角双引号
+]
 
 # 处理完成的标记
 FINISHED_MARKER = "_finished"
@@ -81,12 +87,12 @@ def replace_quotes_in_file(file_path: Path) -> bool:
         content = file_path.read_text(encoding="utf-8")
         origin_content = content
 
-        # 使用预编译的正则表达式进行替换
         content = DELETE_PATTERN.sub("", content)
-        content = QUOTE_PATTERN.sub(r"「\1」", content)
+        for pattern, replacement in QUOTE_PATTERNS:
+            content = pattern.sub(replacement, content)
         content = content.replace("♥", "❤️").replace("♡", "❤️")
 
-        # 若是内容有变化，则将其写回文件。
+        # 若是内容有变化，则将其写回文件
         if content != origin_content:
             file_path.write_text(content, encoding="utf-8")
             return True
