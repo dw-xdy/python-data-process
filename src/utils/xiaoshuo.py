@@ -11,11 +11,11 @@ DELETE_PATTERN = re.compile(
 
 # 2. 替换引号为直角引号的模式
 QUOTE_PATTERNS = [
-    (re.compile(r'"(.*?)"'), r"「\1」"),  # 双引号
-    (re.compile(r"'(.*?)'"), r"「\1」"),  # 单引号
-    (re.compile(r"“(.*?)”"), r"「\1」"),  # 中文左双引号 右双引号
-    (re.compile(r"‘(.*?)’"), r"「\1」"),  # 中文左单引号 右单引号
-    (re.compile(r"＂(.*?)＂"), r"「\1」"),  # 全角双引号
+    (re.compile(r'"(.*?)"', re.DOTALL), r"「\1」"),     # 双引号
+    (re.compile(r"'(.*?)'", re.DOTALL), r"「\1」"),     # 单引号
+    (re.compile(r"“(.*?)”", re.DOTALL), r"「\1」"),     # 中文左双引号
+    (re.compile(r"‘(.*?)’", re.DOTALL), r"「\1」"),     # 中文左单引号
+    (re.compile(r"＂(.*?)＂", re.DOTALL), r"「\1」"),    # 全角双引号
 ]
 
 # 处理完成的标记
