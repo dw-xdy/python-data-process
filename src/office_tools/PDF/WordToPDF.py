@@ -2,28 +2,42 @@ from pathlib import Path
 from docx2pdf import convert
 
 
-def batch_convert_folder_to_pdf(source_dir: Path, output_dir: Path):
-    """
-    批量将文件夹中的所有 Word 转换为 PDF 并移动到指定目录
-    """
-    # 确保输出目录存在
-    output_dir.mkdir(parents=True, exist_ok=True)
+def get_input_path(prompt: str, check_exists: bool = False) -> Path:
+    """获取输入路径，可选检查路径是否存在"""
+    while True:
+        path_str = input(prompt + ": ").strip()
+        if not path_str:
+            print("❌ 路径不能为空")
+            continue
 
-    print(f"🚀 开始批量转换任务: {source_dir} -> {output_dir}")
+        path = Path(path_str)
+        if check_exists and not path.exists():
+            print(f"❌ 路径不存在: {path_str}")
+            continue
+
+        return path
+
+
+def batch_convert_folder_to_pdf(source_dir: Path, output_dir: Path):
+    """批量将文件夹中的所有 Word 转换为 PDF"""
+    if not source_dir.exists():
+        print(f"❌ 源文件夹不存在: {source_dir}")
+        return
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    print(f"🚀 开始转换: {source_dir} -> {output_dir}")
 
     try:
-        # docx2pdf 的强大之处：可以直接传入两个目录
-        # 它会自动匹配源目录下的所有 docx 并生成到目标目录
-        convert(source_dir, output_dir)
-        print(f"\n✨ 批量处理完成！PDF 已存入: {output_dir}")
+        convert(str(source_dir), str(output_dir))
+        print(f"\n✨ 转换完成！PDF 已保存到: {output_dir}")
     except Exception as e:
-        print(f"⚠️ 批量转换过程中出现问题: {e}")
+        print(f"⚠️ 转换失败: {e}")
+        import traceback
+
+        traceback.print_exc()
 
 
-# --- 执行示例 ---
 if __name__ == "__main__":
-    # 设置你的 Word 所在的文件夹
-    WORD_INPUT = r"C:\Users\asus\Desktop\学校作业\高频\423109070829冯肖伟实验四.docx"
-    PDF_OUTPUT = r"C:\Users\asus\Desktop\学校作业\高频"
-
-    batch_convert_folder_to_pdf(Path(WORD_INPUT), Path(PDF_OUTPUT))
+    WORD_INPUT = get_input_path("请输入Word源文件夹路径", check_exists=True)
+    PDF_OUTPUT = get_input_path("请输入PDF目标文件夹路径")
+    batch_convert_folder_to_pdf(WORD_INPUT, PDF_OUTPUT)
