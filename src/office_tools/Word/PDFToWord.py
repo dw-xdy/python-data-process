@@ -28,7 +28,7 @@ def batch_convert_pdfs_to_word(source_dir: Path, output_dir: Path):
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # 使用更简洁的方式查找PDF文件
-    pdf_files = list(source_dir.glob("*.pdf")) + list(source_dir.glob("*.PDF"))
+    pdf_files = list(source_dir.glob("*.pdf"))
 
     if not pdf_files:
         print(f"⚠️ 在 {source_dir} 中没有找到 PDF 文件")
