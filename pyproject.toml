@@ -19,6 +19,7 @@ dependencies = [
     "pdf2docx>=0.5.8",
     "pillow>=12.0.0",
     "pkuseg>=0.0.25",
+    "plotnine>=0.15.4",
     "polars>=1.36.1",
     "pyarrow>=22.0.0",
     "pyautogui>=0.9.54",
