@@ -1,14 +1,14 @@
 import time
-import os
+from pathlib import Path
 import pyautogui
 
 
 class QuickBrowserAutomation:
     def __init__(self):
         # 创建截图保存目录
-        self.screenshot_dir = "C:\\Users\\asus\\Desktop\\学校作业\\water"
-        if not os.path.exists(self.screenshot_dir):
-            os.makedirs(self.screenshot_dir)
+        self.screenshot_dir = Path("C:\\Users\\asus\\Desktop\\学校作业\\water")
+        if not self.screenshot_dir.exists():
+            Path.mkdir(self.screenshot_dir)
 
         # 预设的按钮坐标（根据你刚才获取的坐标）
         self.save_btn_pos = (1439, 1187)  # 保存按钮
