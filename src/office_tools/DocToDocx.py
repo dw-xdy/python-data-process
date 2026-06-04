@@ -1,86 +1,154 @@
 import win32com.client as win32
 from pathlib import Path
+import sys
 
 
-def batch_convert(folder_path):
-    """
-    将指定文件夹下的所有 .doc 文件批量转换为 .docx
+def convert_doc_to_docx(word, doc_path, docx_path):
+    """将单个 .doc 文件转换为 .docx"""
+    try:
+        doc = word.Documents.Open(str(doc_path.resolve()))
+        doc.SaveAs2(str(docx_path), FileFormat=16)  # 16 = wdFormatDocumentDefault
+        doc.Close()
+        print(f"  ✓ 已转换: {doc_path.name} -> {docx_path.name}")
+        return True
+    except Exception as e:
+        print(f"  ✗ 转换失败 {doc_path.name}: {e}")
+        return False
 
-    Args:
-        folder_path: 文件夹路径（字符串或Path对象）
-    """
-    # 转换为Path对象
+
+def process_single_file(word, file_path, output_folder):
+    """处理单个 .doc 文件，转换为 .docx 并存放到指定输出文件夹"""
+    file_path = Path(file_path)
+
+    if not file_path.exists():
+        print(f"❌ 文件不存在: {file_path}")
+        return False
+
+    if file_path.suffix.lower() != ".doc":
+        print(f"❌ 不支持的文件格式: {file_path.name}（仅支持 .doc）")
+        return False
+
+    # 输出路径：放在 docx 文件夹下，保持原文件名
+    docx_path = output_folder / f"{file_path.stem}.docx"
+
+    # 如果目标文件已存在，询问是否覆盖
+    if docx_path.exists():
+        print(f"⚠️ 目标文件已存在: {docx_path.name}")
+        overwrite = input("是否覆盖？(y/n): ").strip().lower()
+        if overwrite != "y":
+            print(f"  ✗ 跳过: {file_path.name}")
+            return False
+
+    return convert_doc_to_docx(word, file_path, docx_path)
+
+
+def process_folder(word, folder_path):
+    """处理文件夹：查找所有 .doc 文件并转换"""
     folder_path = Path(folder_path)
 
-    # 检查文件夹是否存在
-    if not folder_path.exists():
-        print(f"错误：文件夹不存在 - {folder_path}")
+    if not folder_path.exists() or not folder_path.is_dir():
+        print(f"❌ 文件夹不存在或无效: {folder_path}")
         return
 
-    if not folder_path.is_dir():
-        print(f"错误：路径不是文件夹 - {folder_path}")
-        return
+    # 在输入的文件夹下创建 docx 文件夹
+    docx_folder = folder_path / "docx"
+    docx_folder.mkdir(exist_ok=True)
+    print(f"📂 docx 输出目录: {docx_folder}\n")
 
-    # 获取所有 .doc 文件（排除临时文件）
-    file_paths = [
-        str(folder_path / f.name)
+    # 查找所有 .doc 文件（排除临时文件）
+    doc_files = [
+        f
         for f in folder_path.iterdir()
-        if f.suffix.lower() == ".doc" and not f.name.startswith("~$")
+        if f.is_file() and f.suffix.lower() == ".doc" and not f.name.startswith("~$")
     ]
 
-    if not file_paths:
-        print(f"在 {folder_path} 中未找到任何 .doc 文件")
+    if not doc_files:
+        print(f"⚠️ 在 {folder_path} 中未找到任何 .doc 文件")
         return
 
-    # 开始转换
-    print(f"准备转换 {len(file_paths)} 个文件...")
-    print("-" * 50)
+    print(f"📁 找到 {len(doc_files)} 个 .doc 文件")
+    print("-" * 60)
 
+    success_count = 0
+    for file_path in doc_files:
+        print(f"📄 正在处理: {file_path.name}")
+        if process_single_file(word, file_path, docx_folder):
+            success_count += 1
+        print()
+
+    print("-" * 60)
+    print(f"✨ 完成！成功: {success_count}/{len(doc_files)} 个文件")
+
+
+def normalize_path(path_str):
+    """标准化路径，处理各种输入格式"""
+    # 去除首尾空格和引号
+    path_str = path_str.strip().strip('"').strip("'")
+    # 将反斜杠替换为正斜杠
+    path_str = path_str.replace("\\", "/")
+    return path_str
+
+
+def main():
+    """主函数：支持拖拽文件/文件夹到脚本上运行，或直接双击运行后输入路径"""
+    print("=" * 60)
+    print(".doc 转 .docx 工具")
+    print("=" * 60)
+    print("\n提示：可以直接粘贴路径，支持使用反斜杠(\\ 或 /)")
+    print("-" * 60)
+
+    # 获取要处理的路径
+    if len(sys.argv) > 1:
+        # 从命令行参数获取路径（支持拖拽）
+        input_paths = [Path(normalize_path(p)) for p in sys.argv[1:]]
+    else:
+        # 手动输入路径
+        print("\n请输入要处理的文件或文件夹路径：")
+        print("（支持多个路径，用空格分隔）")
+        path_input = input(">>> ").strip()
+        if not path_input:
+            print("❌ 路径不能为空")
+            return
+
+        raw_paths = path_input.split()
+        input_paths = []
+        for raw_path in raw_paths:
+            normalized = normalize_path(raw_path)
+            if normalized:
+                input_paths.append(Path(normalized))
+
+    # 启动 Word 应用程序
+    print("\n🚀 正在启动 Word 应用程序...")
     try:
-        # 启动 Word 应用程序
         word = win32.gencache.EnsureDispatch("Word.Application")
         word.Visible = False
-
-        success_count = 0
-        for doc_path in file_paths:
-            doc_path_obj = Path(doc_path)
-            abs_path = str(doc_path_obj.resolve())
-            docx_path = str(doc_path_obj.with_suffix(".docx"))
-
-            try:
-                doc = word.Documents.Open(abs_path)
-                doc.SaveAs2(docx_path, FileFormat=16)  # 16 对应 wdFormatDocumentDefault
-                doc.Close()
-                success_count += 1
-                print(f"✓ 已转换: {doc_path_obj.name}")
-            except Exception as e:
-                print(f"✗ 转换失败 {doc_path_obj.name}: {e}")
-
-        word.Quit()
-        print("-" * 50)
-        print(f"转换完成！成功: {success_count}/{len(file_paths)}")
-
+        print("✓ Word 已启动\n")
     except Exception as e:
-        print(f"错误：无法启动 Word 应用程序 - {e}")
+        print(f"❌ 无法启动 Word 应用程序: {e}")
+        return
+
+    # 处理每个路径
+    for input_path in input_paths:
+        if not input_path.exists():
+            print(f"❌ 路径不存在: {input_path}")
+            continue
+
+        if input_path.is_file():
+            # 单个文件处理：需要在文件所在目录创建 docx 文件夹
+            docx_folder = input_path.parent / "docx"
+            docx_folder.mkdir(exist_ok=True)
+            print(f"📄 处理单个文件: {input_path}")
+            process_single_file(word, input_path, docx_folder)
+        elif input_path.is_dir():
+            print(f"📁 处理文件夹: {input_path}")
+            process_folder(word, input_path)
+        else:
+            print(f"❌ 无效路径: {input_path}")
+
+    # 关闭 Word 应用程序
+    word.Quit()
+    print(f"\n🎉 所有任务完成！")
 
 
 if __name__ == "__main__":
-    # 从命令行输入文件夹路径
-    while True:
-        folder_input = input("请输入要转换的文件夹路径：").strip()
-
-        # 去除可能存在的引号
-        folder_input = folder_input.strip('"').strip("'")
-
-        if not folder_input:
-            print("路径不能为空，请重新输入。")
-            continue
-
-        # 转换为绝对路径
-        folder_path = Path(folder_input).resolve()
-
-        if folder_path.exists() and folder_path.is_dir():
-            batch_convert(folder_path)
-            break
-        else:
-            print(f"错误：'{folder_input}' 不是一个有效的文件夹路径，请重新输入。")
+    main()
