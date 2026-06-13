@@ -197,5 +197,4 @@ def clean_bak_files(folder_path: Path, silent=False):
 if __name__ == "__main__":
     folder_path = r"F:\备份\3_文档文件\小说"
     convert_folder_to_utf8(Path(folder_path))
-    # TODO: 这段代码后续可能要加一下条件判断什么的，毕竟留着.bak文件也别扭。
-    # clean_bak_files(Path(folder_path))
+    clean_bak_files(Path(folder_path))
