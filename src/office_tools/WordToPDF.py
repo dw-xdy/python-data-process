@@ -1,180 +1,167 @@
 import win32com.client as win32
 from pathlib import Path
 import sys
-
-
-def convert_doc_to_docx(word, doc_path, docx_path):
-    """将 .doc 转换为 .docx"""
-    try:
-        doc = word.Documents.Open(str(doc_path.resolve()))
-        doc.SaveAs2(str(docx_path), FileFormat=16)
-        doc.Close()
-        print(f"  ✓ 已转换为 .docx: {doc_path.name}")
-        return True
-    except Exception as e:
-        print(f"  ✗ 转换 .doc 失败 {doc_path.name}: {e}")
-        return False
-
-
-def convert_to_pdf(word, file_path, pdf_path):
-    """将 Word 文件（.doc 或 .docx）转换为 PDF"""
-    try:
-        doc = word.Documents.Open(str(file_path.resolve()))
-        doc.SaveAs2(str(pdf_path), FileFormat=17)
-        doc.Close()
-        print(f"  ✓ 已转换为 PDF: {pdf_path.name}")
-        return True
-    except Exception as e:
-        print(f"  ✗ 转换 PDF 失败 {file_path.name}: {e}")
-        return False
-
-
-def process_single_file(word, file_path):
-    """处理单个文件：如果是 .doc 先转为 .docx 再转 PDF"""
-    file_path = Path(file_path)
-
-    if not file_path.exists():
-        print(f"❌ 文件不存在: {file_path}")
-        return False
-
-    suffix = file_path.suffix.lower()
-    if suffix not in [".doc", ".docx"]:
-        print(f"❌ 不支持的文件格式: {file_path.name}（仅支持 .doc 和 .docx）")
-        return False
-
-    # 在文件所在目录下创建 PDF 文件夹
-    pdf_folder = file_path.parent / "PDF"
-    pdf_folder.mkdir(exist_ok=True)
-
-    # 确定 PDF 输出路径
-    pdf_path = pdf_folder / f"{file_path.stem}.pdf"
-
-    # 如果文件是 .doc，需要先转换为 .docx
-    if suffix == ".doc":
-        docx_path = file_path.with_suffix(".docx")
-        if convert_doc_to_docx(word, file_path, docx_path):
-            result = convert_to_pdf(word, docx_path, pdf_path)
-            # 清理临时 .docx 文件
-            if docx_path.exists():
-                docx_path.unlink()
-            return result
-        return False
-    else:  # .docx 文件
-        return convert_to_pdf(word, file_path, pdf_path)
-
-
-def process_folder(word, folder_path):
-    """处理文件夹：查找所有 .doc 和 .docx 文件并转换"""
-    folder_path = Path(folder_path)
-
-    if not folder_path.exists() or not folder_path.is_dir():
-        print(f"❌ 文件夹不存在或无效: {folder_path}")
-        return
-
-    # 在输入的文件夹下创建 PDF 文件夹
-    pdf_folder = folder_path / "PDF"
-    pdf_folder.mkdir(exist_ok=True)
-    print(f"📂 PDF 输出目录: {pdf_folder}\n")
-
-    # 查找所有 Word 文件
-    word_files = []
-    for f in folder_path.iterdir():
-        if f.is_file() and not f.name.startswith("~$"):
-            suffix = f.suffix.lower()
-            if suffix in [".doc", ".docx"]:
-                word_files.append(f)
-
-    if not word_files:
-        print(f"⚠️ 在 {folder_path} 中未找到任何 .doc 或 .docx 文件")
-        return
-
-    print(f"📁 找到 {len(word_files)} 个 Word 文件")
-    print("-" * 60)
-
-    success_count = 0
-    for file_path in word_files:
-        print(f"📄 正在处理: {file_path.name}")
-        if process_single_file(word, file_path):
-            success_count += 1
-        print()
-
-    print("-" * 60)
-    print(f"✨ 完成！成功: {success_count}/{len(word_files)} 个文件")
+import subprocess
+import platform
 
 
 def normalize_path(path_str):
     """标准化路径，处理各种输入格式"""
-    # 去除首尾空格和引号
     path_str = path_str.strip().strip('"').strip("'")
-
-    # 将反斜杠替换为正斜杠（避免转义问题）
     path_str = path_str.replace("\\", "/")
-
     return path_str
 
 
-def main():
-    """主函数：支持拖拽文件/文件夹到脚本上运行，或直接双击运行后输入路径"""
-    print("=" * 60)
-    print("Word 转 PDF 工具（支持 .doc/.docx）")
-    print("=" * 60)
-    print("\n提示：可以直接粘贴路径，支持使用反斜杠(\\ 或 /)")
-    print("-" * 60)
-
-    # 获取要处理的路径
+def get_input_path() -> Path:
+    """获取输入路径（支持文件或文件夹，支持拖拽）"""
     if len(sys.argv) > 1:
-        # 从命令行参数获取路径（支持拖拽）
-        input_paths = [Path(normalize_path(p)) for p in sys.argv[1:]]
-    else:
-        # 手动输入路径
-        print("\n请输入要处理的文件或文件夹路径：")
-        print("（支持多个路径，用空格分隔）")
-        path_input = input(">>> ").strip()
-        if not path_input:
+        for arg in sys.argv[1:]:
+            path_str = normalize_path(arg)
+            path = Path(path_str)
+            if path.exists():
+                print(f"📌 检测到拖拽路径: {path}")
+                return path
+            else:
+                print(f"⚠️ 拖拽路径不存在: {path_str}")
+
+    while True:
+        print("\n提示：可以直接拖拽文件或文件夹到此窗口，然后按 Enter")
+        path_str = input("请输入 Word 文件或文件夹路径: ").strip()
+        path_str = path_str.strip().strip('"').strip("'")
+
+        if not path_str:
             print("❌ 路径不能为空")
-            input("\n按 Enter 键退出...")
-            return
+            continue
 
-        # 分割多个路径（支持空格分隔）
-        # 使用简单的分割，然后标准化每个路径
-        raw_paths = path_input.split()
-        input_paths = []
-        for raw_path in raw_paths:
-            normalized = normalize_path(raw_path)
-            if normalized:
-                input_paths.append(Path(normalized))
+        path = Path(path_str)
+        if not path.exists():
+            print(f"❌ 路径不存在: {path_str}")
+            continue
 
-    # 启动 Word 应用程序
-    print("\n🚀 正在启动 Word 应用程序...")
+        return path
+
+
+def get_output_dir(input_path: Path) -> Path:
+    """自动生成输出目录"""
+    output_dir = input_path.parent / "PDF" if input_path.is_file() else input_path / "PDF"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    return output_dir
+
+
+def get_word_files(input_path: Path) -> list:
+    """获取要转换的 Word 文件列表（.doc 和 .docx）"""
+    if input_path.is_file():
+        suffix = input_path.suffix.lower()
+        if suffix in [".doc", ".docx"]:
+            return [input_path]
+        else:
+            print(f"❌ 文件不是 Word 格式: {input_path.name}")
+            return []
+    else:
+        word_files = []
+        for f in input_path.glob("*"):
+            if f.is_file() and not f.name.startswith("~$"):
+                suffix = f.suffix.lower()
+                if suffix in [".doc", ".docx"]:
+                    word_files.append(f)
+        if not word_files:
+            print(f"⚠️ 在 {input_path} 中没有找到 .doc 或 .docx 文件")
+        return word_files
+
+
+def convert_single_word_to_pdf(word, file_path: Path, output_path: Path) -> bool:
+    """转换单个 Word 文件为 PDF（自动处理 .doc 和 .docx）"""
+    try:
+        # 如果是 .doc，先转换为临时 .docx
+        temp_docx = None
+        if file_path.suffix.lower() == ".doc":
+            temp_docx = file_path.with_suffix(".temp.docx")
+            doc = word.Documents.Open(str(file_path.resolve()))
+            doc.SaveAs2(str(temp_docx), FileFormat=16)
+            doc.Close()
+            doc_to_open = temp_docx
+        else:
+            doc_to_open = file_path
+
+        # 转换为 PDF
+        doc = word.Documents.Open(str(doc_to_open.resolve()))
+        doc.SaveAs2(str(output_path), FileFormat=17)
+        doc.Close()
+
+        # 清理临时文件
+        if temp_docx and temp_docx.exists():
+            temp_docx.unlink()
+
+        return True
+    except Exception as e:
+        print(f"    错误: {str(e)[:100]}")
+        return False
+
+
+def batch_convert_word_to_pdf(input_path: Path):
+    """批量转换 Word 为 PDF"""
+    word_files = get_word_files(input_path)
+    if not word_files:
+        return
+
+    output_dir = get_output_dir(input_path)
+
+    print(f"\n📂 输入: {input_path}")
+    print(f"📂 输出: {output_dir}")
+    print(f"📁 找到 {len(word_files)} 个 Word 文件")
+    print("-" * 50)
+
+    # 启动 Word
     try:
         word = win32.gencache.EnsureDispatch("Word.Application")
         word.Visible = False
-        print("✓ Word 已启动\n")
     except Exception as e:
-        print(f"❌ 无法启动 Word 应用程序: {e}")
-        input("\n按 Enter 键退出...")
+        print(f"❌ 无法启动 Word: {e}")
         return
 
-    # 处理每个路径
-    for input_path in input_paths:
-        if not input_path.exists():
-            print(f"❌ 路径不存在: {input_path}")
-            print(f"   提示：请检查路径是否正确，或尝试使用正斜杠(/)或双反斜杠(\\\\)")
+    success_count = 0
+    fail_count = 0
+
+    for i, file_path in enumerate(word_files, 1):
+        output_path = output_dir / f"{file_path.stem}.pdf"
+
+        if output_path.exists():
+            print(f"[{i}/{len(word_files)}] ⏭️  跳过（已存在）: {file_path.name}")
             continue
 
-        if input_path.is_file():
-            print(f"📄 处理单个文件: {input_path}")
-            process_single_file(word, input_path)
-        elif input_path.is_dir():
-            print(f"📁 处理文件夹: {input_path}")
-            process_folder(word, input_path)
-        else:
-            print(f"❌ 无效路径: {input_path}")
+        print(f"[{i}/{len(word_files)}] 转换中: {file_path.name}")
 
-    # 关闭 Word 应用程序
+        if convert_single_word_to_pdf(word, file_path, output_path):
+            print(f"    ✅ 成功: {output_path.name}")
+            success_count += 1
+        else:
+            print(f"    ❌ 失败: {file_path.name}")
+            fail_count += 1
+
     word.Quit()
-    print(f"\n🎉 所有任务完成！")
+
+    print("-" * 50)
+    print(f"✨ 转换完成！成功: {success_count}, 失败: {fail_count}")
+    print(f"📂 文件保存在: {output_dir}")
+
+    # 打开输出文件夹
+    try:
+        if platform.system() == "Windows":
+            subprocess.Popen(f'explorer "{output_dir}"')
+    except:
+        pass
 
 
 if __name__ == "__main__":
-    main()
+    print("=" * 50)
+    print("📄 Word 转 PDF 工具")
+    print("=" * 50)
+    print("支持: 单个 .doc/.docx 文件 或 包含 Word 文件的文件夹")
+    print("输出: 自动在输入路径下创建 'PDF' 文件夹")
+    print("-" * 50)
+
+    if len(sys.argv) > 1:
+        print("📌 已检测到拖拽的文件/文件夹")
+
+    input_path = get_input_path()
+    batch_convert_word_to_pdf(input_path)
