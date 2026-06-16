@@ -43,7 +43,9 @@ def get_input_path() -> Path:
 
 def get_output_dir(input_path: Path) -> Path:
     """自动生成输出目录"""
-    output_dir = input_path.parent / "PDF" if input_path.is_file() else input_path / "PDF"
+    output_dir = (
+        input_path.parent / "PDF" if input_path.is_file() else input_path / "PDF"
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
     return output_dir
 
@@ -145,11 +147,8 @@ def batch_convert_word_to_pdf(input_path: Path):
     print(f"📂 文件保存在: {output_dir}")
 
     # 打开输出文件夹
-    try:
-        if platform.system() == "Windows":
-            subprocess.Popen(f'explorer "{output_dir}"')
-    except:
-        pass
+    if platform.system() == "Windows":
+        subprocess.Popen(f'explorer "{output_dir}"')
 
 
 if __name__ == "__main__":

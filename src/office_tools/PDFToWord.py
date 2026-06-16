@@ -2,6 +2,8 @@ from pathlib import Path
 from pdf2docx import Converter
 import traceback
 import sys
+import subprocess
+import platform
 
 
 def normalize_path(path_str):
@@ -129,15 +131,9 @@ def batch_convert_pdfs_to_word(input_path: Path):
     print(f"✨ 转换完成！成功: {success_count}, 失败: {fail_count}")
     print(f"📂 文件保存在: {output_dir}")
 
-    # 打开输出文件夹（可选）
-    try:
-        import subprocess
-        import platform
-
-        if platform.system() == "Windows":
-            subprocess.Popen(f'explorer "{output_dir}"')
-    except:
-        pass
+    # 打开输出文件夹
+    if platform.system() == "Windows":
+        subprocess.Popen(f'explorer "{output_dir}"')
 
 
 if __name__ == "__main__":
