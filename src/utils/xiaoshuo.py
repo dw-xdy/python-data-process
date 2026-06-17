@@ -153,16 +153,13 @@ def process_single_file(
     return content_modified, name_changed, final_path
 
 
-def process_folder(
-    folder_path_str: str, add_marker: bool = True, skip_processed: bool = True
-):
+def process_folder(folder_path_str: str, add_marker: bool = True):
     """
     处理文件夹下所有 .txt 文件
 
     Args:
         folder_path_str: 文件夹路径
         add_marker: 是否添加完成标记
-        skip_processed: 是否跳过已标记的文件
     """
     folder_path = Path(folder_path_str).resolve()
 
@@ -172,16 +169,10 @@ def process_folder(
 
     total_start = time.perf_counter()
 
-    # 获取所有 txt 文件
+    # 获取所有 txt 文件，自动排除已标记的文件
     all_txt_files = list(folder_path.rglob("*.txt"))
-
-    # 过滤文件
-    if skip_processed:
-        txt_files = [f for f in all_txt_files if not has_finished_marker(f.name)]
-        skipped_count = len(all_txt_files) - len(txt_files)
-    else:
-        txt_files = all_txt_files
-        skipped_count = 0
+    txt_files = [f for f in all_txt_files if not has_finished_marker(f.name)]
+    skipped_count = len(all_txt_files) - len(txt_files)
 
     if not txt_files:
         if skipped_count > 0:
@@ -241,13 +232,12 @@ def process_folder(
     return processed_files, failed_files
 
 
-def remove_finished_markers(folder_path_str: str, dry_run: bool = True):
+def remove_finished_markers(folder_path_str: str):
     """
     移除所有文件的 _finished 标记（用于重新处理）
 
     Args:
         folder_path_str: 文件夹路径
-        dry_run: 是否仅预览（不实际执行）
     """
     folder_path = Path(folder_path_str).resolve()
 
@@ -265,15 +255,6 @@ def remove_finished_markers(folder_path_str: str, dry_run: bool = True):
 
     print(f"找到 {len(finished_files)} 个带有标记的文件")
 
-    if dry_run:
-        print("\n📋 预览（不会实际执行）:")
-        for f in finished_files:
-            new_name = remove_finished_marker(f.name)
-            print(f"  {f.name} -> {new_name}")
-        print("\n💡 若要实际执行，请设置 dry_run=False")
-        return
-
-    # 实际执行
     for file_path in finished_files:
         new_name = remove_finished_marker(file_path.name)
         new_path = file_path.parent / new_name
@@ -301,12 +282,10 @@ if __name__ == "__main__":
     if Path(folder_path).is_dir():
         print("开始执行...\n")
 
-        # 处理文件（默认添加 _finished 标记）
-        process_folder(folder_path, add_marker=True, skip_processed=True)
+        # 若是重新处理文件，可以移除标记之后处理:
+        # remove_finished_markers(folder_path)
 
-        # 如果需要重新处理所有文件（包括已有标记的），可以这样做：
-        # 1. 先移除标记: remove_finished_markers(folder_path, dry_run=False)
-        # 2. 再重新处理: process_folder(folder_path, add_marker=True, skip_processed=False)
+        process_folder(folder_path, add_marker=True)
 
     else:
         print(f"错误：'{folder_path}' 不是一个有效的文件夹路径")
