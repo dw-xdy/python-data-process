@@ -40,8 +40,8 @@ def convert_to_utf8(file_path: Path, backup=True) -> tuple:
                     return data == reencoded, decoded
                 else:
                     return False, decoded
-            except:
-                return False, None
+            except (UnicodeDecodeError, UnicodeEncodeError, LookupError):
+                    return False, None
 
         # 尝试检测到的编码
         if original_encoding and confidence > 0.5:
@@ -76,7 +76,7 @@ def convert_to_utf8(file_path: Path, backup=True) -> tuple:
                     min_errors = error_count
                     best_encoding = encoding
                     best_content = content
-            except:
+            except (UnicodeDecodeError, LookupError):
                 continue
 
         if best_content and min_errors < len(best_content) * 0.01:  # 错误少于1%
