@@ -56,7 +56,7 @@ def clean_filename(filename: str) -> Tuple[str, bool]:
     return cleaned, cleaned != original
 
 
-def ensure_unique_filename(new_path: Path):
+def ensure_unique_filename(new_path: Path) -> Path:
     """
     如果目标文件已存在，添加数字后缀
     Args:
@@ -69,6 +69,7 @@ def ensure_unique_filename(new_path: Path):
         suffix = original_new_path.suffix
         new_path = original_new_path.parent / f"{stem}_{counter}{suffix}"
         counter += 1
+    return new_path
 
 
 def add_finished_marker(file_path: Path) -> Optional[Path]:
@@ -81,7 +82,7 @@ def add_finished_marker(file_path: Path) -> Optional[Path]:
     new_name = f"{stem}{FINISHED_MARKER}{suffix}"
     new_path = file_path.parent / new_name
 
-    ensure_unique_filename(new_path)
+    new_path = ensure_unique_filename(new_path)
 
     try:
         file_path.rename(new_path)
@@ -131,7 +132,7 @@ def process_single_file(
     if name_changed:
         new_path = file_path.parent / cleaned_name
 
-        ensure_unique_filename(new_path)
+        new_path = ensure_unique_filename(new_path)
 
         try:
             file_path.rename(new_path)
@@ -263,7 +264,7 @@ def remove_finished_markers(folder_path_str: str):
         new_name = remove_finished_marker(file_path.name)
         new_path = file_path.parent / new_name
 
-        ensure_unique_filename(new_path)
+        new_path = ensure_unique_filename(new_path)
 
         try:
             file_path.rename(new_path)
