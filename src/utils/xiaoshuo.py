@@ -56,6 +56,21 @@ def clean_filename(filename: str) -> Tuple[str, bool]:
     return cleaned, cleaned != original
 
 
+def ensure_unique_filename(new_path: Path):
+    """
+    如果目标文件已存在，添加数字后缀
+    Args:
+        new_path: 文件名路径
+    """
+    counter = 1
+    original_new_path = new_path
+    while new_path.exists():
+        stem = original_new_path.stem
+        suffix = original_new_path.suffix
+        new_path = original_new_path.parent / f"{stem}_{counter}{suffix}"
+        counter += 1
+
+
 def add_finished_marker(file_path: Path) -> Optional[Path]:
     """为文件添加完成标记，返回新的文件路径，如果已存在则返回 None"""
     if has_finished_marker(file_path.name):
@@ -66,12 +81,7 @@ def add_finished_marker(file_path: Path) -> Optional[Path]:
     new_name = f"{stem}{FINISHED_MARKER}{suffix}"
     new_path = file_path.parent / new_name
 
-    # 如果目标文件已存在，添加数字后缀
-    counter = 1
-    while new_path.exists():
-        new_name = f"{stem}{FINISHED_MARKER}_{counter}{suffix}"
-        new_path = file_path.parent / new_name
-        counter += 1
+    ensure_unique_filename(new_path)
 
     try:
         file_path.rename(new_path)
@@ -120,14 +130,8 @@ def process_single_file(
 
     if name_changed:
         new_path = file_path.parent / cleaned_name
-        # 处理文件名冲突
-        counter = 1
-        original_new_path = new_path
-        while new_path.exists():
-            stem = original_new_path.stem
-            suffix = original_new_path.suffix
-            new_path = original_new_path.parent / f"{stem}_{counter}{suffix}"
-            counter += 1
+
+        ensure_unique_filename(new_path)
 
         try:
             file_path.rename(new_path)
@@ -259,14 +263,7 @@ def remove_finished_markers(folder_path_str: str):
         new_name = remove_finished_marker(file_path.name)
         new_path = file_path.parent / new_name
 
-        # 处理文件名冲突
-        counter = 1
-        original_new_path = new_path
-        while new_path.exists():
-            stem = original_new_path.stem
-            suffix = original_new_path.suffix
-            new_path = original_new_path.parent / f"{stem}_{counter}{suffix}"
-            counter += 1
+        ensure_unique_filename(new_path)
 
         try:
             file_path.rename(new_path)
