@@ -57,11 +57,7 @@ def clean_filename(filename: str) -> Tuple[str, bool]:
 
 
 def ensure_unique_filename(new_path: Path) -> Path:
-    """
-    如果目标文件已存在，添加数字后缀
-    Args:
-        new_path: 文件名路径
-    """
+    """ 如果目标文件已存在，添加数字后缀 """
     counter = 1
     original_new_path = new_path
     while new_path.exists():
