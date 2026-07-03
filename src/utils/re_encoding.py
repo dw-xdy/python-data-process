@@ -154,13 +154,12 @@ def convert_folder_to_utf8(folder_path: Path) -> tuple:
     return converted_count, converted_files
 
 
-def clean_bak_files(folder_path: Path, silent=False):
+def clean_bak_files(folder_path: Path):
     """
     递归删除指定文件夹下所有 .bak 备份文件
 
     Args:
         folder_path: 要清理的文件夹路径
-        silent: 是否静默模式（不显示删除详情）
 
     Returns:
         删除的文件数量
@@ -173,8 +172,7 @@ def clean_bak_files(folder_path: Path, silent=False):
     bak_files = list(folder_path.rglob("*.bak"))
 
     if not bak_files:
-        if not silent:
-            print("📭 没有找到任何 .bak 备份文件")
+        print("📭 没有找到任何 .bak 备份文件")
         return 0
 
     # 删除文件
@@ -183,13 +181,11 @@ def clean_bak_files(folder_path: Path, silent=False):
         try:
             bak_file.unlink()
             deleted_count += 1
-            if not silent:
-                print(f"🗑️  删除: {bak_file}")
+            print(f"🗑️  删除: {bak_file}")
         except Exception as e:
             print(f"❌ 删除失败 {bak_file}: {e}")
 
-    if not silent:
-        print(f"\n✅ 已删除 {deleted_count} 个 .bak 备份文件")
+    print(f"\n✅ 已删除 {deleted_count} 个 .bak 备份文件")
 
     return deleted_count
 
