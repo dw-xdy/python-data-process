@@ -18,8 +18,11 @@ QUOTE_PATTERNS = [
     (re.compile(r"＂(.*?)＂", re.DOTALL), r"「\1」"),  # 全角双引号
 ]
 
-# 处理完成的标记
+# 3. 处理完成的标记
 FINISHED_MARKER = "_finished"
+
+# 4. 排除的文件夹名称列表（不会处理这些文件夹及其子文件夹中的文件）
+EXCLUDED_FOLDERS = ["不进行格式化操作"]  # 可以在这里添加更多要排除的文件夹名称
 
 
 def has_finished_marker(filename: str) -> bool:
@@ -57,7 +60,7 @@ def clean_filename(filename: str) -> Tuple[str, bool]:
 
 
 def ensure_unique_filename(new_path: Path) -> Path:
-    """ 如果目标文件已存在，添加数字后缀 """
+    """如果目标文件已存在，添加数字后缀"""
     counter = 1
     original_new_path = new_path
     while new_path.exists():
@@ -170,21 +173,62 @@ def process_folder(folder_path_str: str, add_marker: bool = True):
 
     total_start = time.perf_counter()
 
-    # 获取所有 txt 文件，自动排除已标记的文件
+    # 获取所有 txt 文件（包括排除文件夹中的）
     all_txt_files = list(folder_path.rglob("*.txt"))
-    txt_files = [f for f in all_txt_files if not has_finished_marker(f.name)]
-    skipped_count = len(all_txt_files) - len(txt_files)
 
-    if not txt_files:
-        if skipped_count > 0:
-            print(f"📁 所有 {skipped_count} 个文件都已处理完成，无需重复处理")
+    # 分离文件：需要完整处理的 vs 只处理文件名的
+    full_process_files = []  # 完整处理（内容+文件名）
+    name_only_files = []  # 只处理文件名
+
+    for file_path in all_txt_files:
+        # 检查是否在排除文件夹中
+        if any(excluded in file_path.parent.parts for excluded in EXCLUDED_FOLDERS):
+            name_only_files.append(file_path)
+        else:
+            full_process_files.append(file_path)
+
+    # 从完整处理中排除已标记的文件
+    full_process_files = [
+        f for f in full_process_files if not has_finished_marker(f.name)
+    ]
+
+    # 从只处理文件名中排除已标记的文件
+    name_only_files = [f for f in name_only_files if not has_finished_marker(f.name)]
+
+    # 合并所有需要处理文件名的文件
+    all_files_to_rename = full_process_files + name_only_files
+
+    # 统计信息
+    excluded_count = len(
+        [
+            f
+            for f in all_txt_files
+            if any(excluded in f.parent.parts for excluded in EXCLUDED_FOLDERS)
+        ]
+    )
+    skipped_marked_count = len(all_txt_files) - len(
+        [f for f in all_txt_files if not has_finished_marker(f.name)]
+    )
+
+    if not all_files_to_rename:
+        if excluded_count > 0:
+            print(
+                f"📁 在排除文件夹中找到 {excluded_count} 个文件（仅处理文件名，但都已标记完成）"
+            )
+
+        if skipped_marked_count > 0:
+            print(f"📁 所有 {skipped_marked_count} 个文件都已处理完成，无需重复处理")
         else:
             print(f"在 {folder_path} 中没有找到 .txt 文件")
         return
 
-    print(f"📁 找到 {len(txt_files)} 个待处理的 .txt 文件")
-    if skipped_count > 0:
-        print(f"⏭️  跳过 {skipped_count} 个已处理的文件")
+    print(f"📁 找到 {len(all_files_to_rename)} 个需要处理文件名的文件")
+    if excluded_count > 0:
+        print(
+            f"📝 其中 {len(name_only_files)} 个文件在排除文件夹中（仅重命名，不修改内容）"
+        )
+    if skipped_marked_count > 0:
+        print(f"⏭️  跳过 {skipped_marked_count} 个已处理的文件")
     print()
 
     # 处理文件
@@ -193,23 +237,60 @@ def process_folder(folder_path_str: str, add_marker: bool = True):
     processed_files = []
     failed_files = []
 
-    for i, file_path in enumerate(txt_files, 1):
-        print(f"[{i}/{len(txt_files)}] 处理: {file_path.name}")
-        content_modified, name_changed, final_path = process_single_file(
-            file_path, add_marker
+    for i, file_path in enumerate(all_files_to_rename, 1):
+        # 判断是否在排除文件夹中
+        is_excluded = any(
+            excluded in file_path.parent.parts for excluded in EXCLUDED_FOLDERS
         )
 
-        if content_modified:
-            modified_content_count += 1
+        if is_excluded:
+            print(
+                f"[{i}/{len(all_files_to_rename)}] 处理（仅重命名）: {file_path.name}"
+            )
+        else:
+            print(f"[{i}/{len(all_files_to_rename)}] 处理: {file_path.name}")
+
+        # 处理文件名
+        old_name = file_path.name
+        cleaned_name, name_changed = clean_filename(old_name)
+
+        current_path = file_path
+
         if name_changed:
-            renamed_count += 1
+            new_path = current_path.parent / cleaned_name
+            new_path = ensure_unique_filename(new_path)
+
+            try:
+                current_path.rename(new_path)
+                current_path = new_path
+                print(f"  📝 重命名: {old_name} -> {current_path.name}")
+                renamed_count += 1
+            except Exception as e:
+                print(f"  ❌ 重命名失败 {old_name}: {e}")
+                failed_files.append(file_path)
+                print()
+                continue
+
+        if not is_excluded:
+            content_modified = replace_quotes_in_file(current_path)
+            if content_modified:
+                print(f"  ✏️  修改内容: {current_path.name}")
+                modified_content_count += 1
+        else:
+            print("  ⏭️  跳过内容修改（在排除文件夹中）")
+
+        # 添加完成标记（所有文件都添加）
+        final_path = current_path
+        if add_marker and not has_finished_marker(current_path.name):
+            marked_path = add_finished_marker(current_path)
+            if marked_path:
+                final_path = marked_path
+                print(f"  ✅ 添加完成标记: {current_path.name} -> {final_path.name}")
 
         if final_path:
             processed_files.append((file_path, final_path))
-        else:
-            failed_files.append(file_path)
 
-        print()  # 添加空行分隔
+        print()
 
     total_elapsed = time.perf_counter() - total_start
 
@@ -225,7 +306,10 @@ def process_folder(folder_path_str: str, add_marker: bool = True):
 
     print("\n📈 详细统计:")
     print(f"   - 重命名文件: {renamed_count} 个")
-    print(f"   - 修改内容: {modified_content_count} 个文件")
+    print(
+        f"   - 修改内容: {modified_content_count} 个文件（排除文件夹中的文件不修改内容）"
+    )
+    print(f"   - 排除文件夹中的文件: {len(name_only_files)} 个（仅重命名）")
     print(f"   - 添加完成标记: {len(processed_files)} 个文件" if add_marker else "")
     print(f"   - 总耗时: {total_elapsed:.4f} 秒")
     print("=" * 50 + "\n")
