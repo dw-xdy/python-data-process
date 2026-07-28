@@ -1,0 +1,155 @@
+import win32com.client as win32
+from pathlib import Path
+import sys
+import subprocess
+import platform
+
+
+def normalize_path(path_str):
+    """标准化路径，处理各种输入格式"""
+    path_str = path_str.strip().strip('"').strip("'")
+    path_str = path_str.replace("\\", "/")
+    return path_str
+
+
+def get_input_path() -> Path:
+    """获取输入路径（支持文件或文件夹，支持拖拽）"""
+    if len(sys.argv) > 1:
+        for arg in sys.argv[1:]:
+            path_str = normalize_path(arg)
+            path = Path(path_str)
+            if path.exists():
+                print(f"📌 检测到拖拽路径: {path}")
+                return path
+            else:
+                print(f"⚠️ 拖拽路径不存在: {path_str}")
+
+    while True:
+        print("\n提示：可以直接拖拽文件或文件夹到此窗口，然后按 Enter")
+        path_str = input("请输入 PPT 文件或文件夹路径: ").strip()
+        path_str = path_str.strip().strip('"').strip("'")
+
+        if not path_str:
+            print("❌ 路径不能为空")
+            continue
+
+        path = Path(path_str)
+        if not path.exists():
+            print(f"❌ 路径不存在: {path_str}")
+            continue
+
+        return path
+
+
+def get_output_dir(input_path: Path) -> Path:
+    """自动生成输出目录"""
+    output_dir = (
+        input_path.parent / "PDF" if input_path.is_file() else input_path / "PDF"
+    )
+    output_dir.mkdir(parents=True, exist_ok=True)
+    return output_dir
+
+
+def get_ppt_files(input_path: Path) -> list:
+    """获取要转换的 PPT 文件列表（.ppt 和 .pptx）"""
+    if input_path.is_file():
+        suffix = input_path.suffix.lower()
+        if suffix in [".ppt", ".pptx"]:
+            return [input_path]
+        else:
+            print(f"❌ 文件不是 PPT 格式: {input_path.name}")
+            return []
+    else:
+        ppt_files = []
+        for f in input_path.glob("*"):
+            if f.is_file() and not f.name.startswith("~$"):
+                suffix = f.suffix.lower()
+                if suffix in [".ppt", ".pptx"]:
+                    ppt_files.append(f)
+        if not ppt_files:
+            print(f"⚠️ 在 {input_path} 中没有找到 .ppt 或 .pptx 文件")
+        return ppt_files
+
+
+def convert_single_ppt_to_pdf(powerpoint, file_path: Path, output_path: Path) -> bool:
+    """转换单个 PPT 文件为 PDF"""
+    try:
+        # 打开 PPT
+        pres = powerpoint.Presentations.Open(str(file_path.resolve()))
+        
+        # 保存为 PDF (格式: 32 = PDF)
+        pres.SaveAs(str(output_path), FileFormat=32)
+        pres.Close()
+        
+        return True
+    except Exception as e:
+        print(f"    错误: {str(e)[:100]}")
+        return False
+
+
+def batch_convert_ppt_to_pdf(input_path: Path):
+    """批量转换 PPT 为 PDF"""
+    ppt_files = get_ppt_files(input_path)
+    if not ppt_files:
+        return
+
+    output_dir = get_output_dir(input_path)
+
+    print(f"\n📂 输入: {input_path}")
+    print(f"📂 输出: {output_dir}")
+    print(f"📁 找到 {len(ppt_files)} 个 PPT 文件")
+    print("-" * 50)
+
+    # 启动 PowerPoint
+    try:
+        powerpoint = win32.gencache.EnsureDispatch("PowerPoint.Application")
+        # 解决方法1: 设置为可见（会弹出窗口，但转换完会自动关闭）
+        powerpoint.Visible = True
+    except Exception as e:
+        print(f"❌ 无法启动 PowerPoint: {e}")
+        print("   请确保已安装 Microsoft PowerPoint")
+        return
+
+    success_count = 0
+    fail_count = 0
+
+    for i, file_path in enumerate(ppt_files, 1):
+        output_path = output_dir / f"{file_path.stem}.pdf"
+
+        if output_path.exists():
+            print(f"[{i}/{len(ppt_files)}] ⏭️  跳过（已存在）: {file_path.name}")
+            continue
+
+        print(f"[{i}/{len(ppt_files)}] 转换中: {file_path.name}")
+
+        if convert_single_ppt_to_pdf(powerpoint, file_path, output_path):
+            print(f"    ✅ 成功: {output_path.name}")
+            success_count += 1
+        else:
+            print(f"    ❌ 失败: {file_path.name}")
+            fail_count += 1
+
+    powerpoint.Quit()
+
+    print("-" * 50)
+    print(f"✨ 转换完成！成功: {success_count}, 失败: {fail_count}")
+    print(f"📂 文件保存在: {output_dir}")
+
+    # 打开输出文件夹
+    if platform.system() == "Windows":
+        subprocess.Popen(f'explorer "{output_dir}"')
+
+
+if __name__ == "__main__":
+    print("=" * 50)
+    print("📄 PPT 转 PDF 工具")
+    print("=" * 50)
+    print("支持: 单个 .ppt/.pptx 文件 或 包含 PPT 文件的文件夹")
+    print("输出: 自动在输入路径下创建 'PDF' 文件夹")
+    print("-" * 50)
+
+    if len(sys.argv) > 1:
+        print("📌 已检测到拖拽的文件/文件夹")
+
+    input_path = get_input_path()
+    batch_convert_ppt_to_pdf(input_path)
