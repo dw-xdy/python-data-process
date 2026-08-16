@@ -85,39 +85,7 @@ def run_converter(script_name: str):
 
 
 def main():
-    """主函数"""
-    # 检查命令行参数
-    if len(sys.argv) > 1:
-        arg = sys.argv[1]
-        
-        # 支持直接指定脚本名或编号
-        if arg in CONVERTERS:
-            # 编号模式: converter.py 1
-            script_name = CONVERTERS[arg]["script"]
-            print(f"📌 执行: {CONVERTERS[arg]['name']}")
-            run_converter(script_name)
-            return
-        elif arg in ["--help", "-h"]:
-            print("用法:")
-            print("  converter.py              # 交互式菜单模式")
-            print("  converter.py [编号]       # 直接执行指定功能")
-            print("  converter.py --list       # 列出所有功能")
-            print()
-            print("编号列表:")
-            for key, info in CONVERTERS.items():
-                print(f"  {key} - {info['name']}")
-            return
-        elif arg in ["--list", "-l"]:
-            print("可用的转换功能:")
-            for key, info in CONVERTERS.items():
-                print(f"  [{key}] {info['name']}")
-            return
-        else:
-            print(f"❌ 未知参数: {arg}")
-            print("使用 converter.py --help 查看帮助")
-            return
-    
-    # 交互式菜单模式
+    """主函数 - 只提供交互式菜单模式"""
     while True:
         print_banner()
         print_menu()
