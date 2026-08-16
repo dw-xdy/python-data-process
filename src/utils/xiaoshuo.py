@@ -354,7 +354,7 @@ def remove_finished_markers(folder_path_str: str):
 
 
 if __name__ == "__main__":
-    folder_path = r"F:\备份\3_文档文件\小说"
+    folder_path = r"F:\备份\2_文档文件\小说"
     folder_path = folder_path.strip('"').strip("'")
 
     if Path(folder_path).is_dir():
