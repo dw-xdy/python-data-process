@@ -16,22 +16,22 @@ CONVERTERS = {
     "1": {
         "name": "DOC 转 DOCX",
         "script": "doc_to_docx.py",
-        "description": "将 .doc 文件转换为 .docx 格式"
+        "description": "将 .doc 文件转换为 .docx 格式",
     },
     "2": {
         "name": "PDF 转 Word",
         "script": "pdf_to_word.py",
-        "description": "将 PDF 文件转换为 Word (.docx) 格式"
+        "description": "将 PDF 文件转换为 Word (.docx) 格式",
     },
     "3": {
         "name": "PPT 转 PDF",
         "script": "ppt_to_pdf.py",
-        "description": "将 PPT (.ppt/.pptx) 文件转换为 PDF"
+        "description": "将 PPT (.ppt/.pptx) 文件转换为 PDF",
     },
     "4": {
         "name": "Word 转 PDF",
         "script": "word_to_pdf.py",
-        "description": "将 Word (.doc/.docx) 文件转换为 PDF"
+        "description": "将 Word (.doc/.docx) 文件转换为 PDF",
     },
 }
 
@@ -59,21 +59,19 @@ def print_menu():
 def run_converter(script_name: str):
     """运行指定的转换脚本"""
     script_path = SCRIPT_DIR / script_name
-    
+
     if not script_path.exists():
         print(f"❌ 错误: 找不到脚本文件 {script_name}")
         print(f"   请确保 {script_name} 与当前文件在同一目录下")
         return False
-    
+
     print(f"\n🚀 正在启动: {script_name}")
     print("-" * 60)
-    
+
     try:
         # 使用 subprocess 运行脚本，保留交互式输入功能
         result = subprocess.run(
-            [sys.executable, str(script_path)],
-            cwd=SCRIPT_DIR,
-            check=False
+            [sys.executable, str(script_path)], cwd=SCRIPT_DIR, check=False
         )
         return result.returncode == 0
     except KeyboardInterrupt:
@@ -89,18 +87,18 @@ def main():
     while True:
         print_banner()
         print_menu()
-        
+
         choice = input("\n请输入选项 (0-4): ").strip()
-        
+
         if choice == "0":
             print("\n👋 再见！")
             break
-        
+
         if choice in CONVERTERS:
             info = CONVERTERS[choice]
             print(f"\n📌 执行: {info['name']}")
             run_converter(info["script"])
-            
+
             # 执行完成后等待用户按键
             input("\n按 Enter 键返回菜单...")
         else:
